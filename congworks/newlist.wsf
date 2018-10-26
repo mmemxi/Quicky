@@ -1,0 +1,100 @@
+<job>
+<script language="JavaScript" src="base.js"></script>
+<script language="JavaScript" src="./lib/common.js"></script>
+<script language="JavaScript" src="./lib/xml.js"></script>
+<script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript">
+//----------------------------------------------------------------
+// newlist.wsf 会衆用新規区域の貸出候補を表示する
+// 引数１：会衆番号
+// 引数２：ユーザー名
+//----------------------------------------------------------------
+var congnum=WScript.Arguments(0);	//	会衆番号
+var user=WScript.Arguments(1);		//	ユーザー名
+//----------------------------------------------------------------
+var ConfigAll=ReadXMLFile(IniXML(congnum,"all"),false);
+//----------------------------------------------------------------
+var f,s,i,j,k,num,card,cobj;
+var dir,folders,fitem,obj,nisu;
+var log;
+var now=new Date();
+var today=now.getFullYear()*10000+(now.getMonth()+1)*100+now.getDate();
+//----------------------------------------------------------------
+//	区域フォルダの走査
+//----------------------------------------------------------------
+dir=fso.GetFolder(DataFolder(congnum));
+folders=new Enumerator(dir.SubFolders);
+for(; !folders.atEnd(); folders.moveNext())
+	{
+	fitem=folders.item();
+	if (isNaN(fitem.Name)) continue;
+	num=fso.GetBaseName(fitem.Name);
+
+	//	対象の区域の詳細読込
+	card=new Object();
+	cobj=ReadXMLFile(ConfigXML(congnum,num),false);
+	card.name=cobj.name;	//	区域名
+	card.kubun=cobj.kubun;	//	区域区分
+	card.lastuser="*";		//	最終使用者（ログから取得）
+	card.NowUsing=false;
+	card.lastuse="00000000";
+
+	//	対象の区域のログ読込
+	log=ReadXMLFile(NumFolder(congnum,num)+"log.xml",false);
+	if (log!="")
+		{
+		if ("Status" in log)
+			{
+			if (log.Status=="Using")
+				{
+				card.NowUsing=true;
+				card.Limit=log.Latest.Limit;
+				card.lastuse=log.Latest.Rent;
+				card.lastuser=log.Latest.User;
+				}
+			else{
+				card.NowUsing=false;
+				card.lastuse=log.Latest.End;
+				}
+			}
+		}
+	else{
+		card.NowUsing=false;
+		card.lastuse="20000101";
+		card.lastuser="";
+		}
+
+	//	現在使用中、かつ自分でなければスキップ
+	if ((card.NowUsing)&&(card.lastuser!=user)) continue;
+
+	//	日数十分か確認
+	if (!card.NowUsing)
+		{
+		nisu=CalcDays(card.lastuse,"");
+		if (isCampeign(today))		//	キャンペーン期間中
+			{
+			if (nisu<ConfigAll.BlankCampeign) continue;
+			}
+		else{
+			if (isAfterCampeign(today))		//	ｷｬﾝﾍﾟｰﾝ後30日
+				{
+				if (nisu<ConfigAll.BlankAfterCampeign) continue;
+				}
+			else{							//	通常期間
+				if (nisu<ConfigAll.BlankMin) continue;
+				}
+			}
+		}
+
+	//	ＯＫ、リストに追加
+	if (card.lastuser=="*")
+		{
+		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+nisu+"日前,"+card.lastuser+"\n");
+		}
+	else{
+		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+SplitDate(card.lastuse)+"～,"+card.lastuser+"\n");
+		}
+	}
+WScript.quit();
+</script>
+</job>

@@ -1,0 +1,139 @@
+●Preaching_Campeign
+意味：キャンペーン期間を定義するテーブル
+定義：CREATE TABLE Preaching_Campeign (congnum INTEGER,range_start INTEGER,range_end INTEGER,interval INTEGER);
+項目：	congnum			会衆番号
+		range_start		開始日
+		range_end		終了日
+		interval		キャンペーン期間中の終了後新規開始までの間隔
+
+●Preaching_PublicList
+意味：会衆での奉仕が可能かどうか、区域地図の一覧
+定義：
+CREATE TABLE Preaching_PublicList (congnum INTEGER,num INTEGER,name TEXT,kubun TEXT,lastuse INTEGER,nowusing TEXT,lastuser TEXT ,count INTEGER,MapType TEXT,spanDays INTEGER,HeaderType TEXT,AllMapPosition TEXT,AllMapTitle TEXT,Buildings INTEGER,BuildingsTotal INTEGER,PRIMARY KEY(congnum,num));
+項目：	congnum		会衆番号
+		num			区域番号
+		name		区域名
+		kubun		区分
+		lastuse		最終使用日
+		nowusing	現在使用中(true=使用中,false=未使用）
+		lastuser	最終使用者
+		count			地図枚数
+		MapType			地図種類
+		spanDays		終了までの日数
+		HeaderType		ヘッダタイプ
+		AllMapPosition	全体マップ内の位置
+		AllMapTitle		全体マップ見出し
+		Buildings		建物件数（サマリ情報）
+		BuildingsTotal	建物世帯数（サマリ情報）
+
+●Preaching_PublicDetail
+意味：地図単位の情報
+定義：
+CREATE TABLE Preaching_PublicDetail (congnum INTEGER,num INTEGER,seq INTEGER,M_Area TEXT,M_Zoom LONG,M_Top LONG,M_Left LONG,PRIMARY KEY(congnum,num,seq));
+項目：
+		congnum		会衆番号
+		num			区域番号
+		seq			地図番号
+		M_Area		裏面地図：エリアVML
+		M_Zoom		裏面地図：倍率
+		M_Top		裏面地図：Ｙ座標
+		M_Left		裏面地図：Ｘ座標
+
+●Preaching_Notices
+意味：特記事項の情報
+定義：
+CREATE TABLE Preaching_Notices (congnum INTEGER,num INTEGER,seq INTEGER,KBN1 TEXT,KBN2 TEXT,Name TEXT,Person TEXT,Reason TEXT,Date INTEGER,Servant TEXT,Confirm TEXT,Position TEXT,Writing TEXT,LastConfirm INTEGER,Frequency TEXT,Cycle TEXT);
+項目：
+		congnum		会衆番号
+		num			区域番号
+		seq			地図番号
+		KBN1		区分１（拒否,再訪問/研究,外国語/手話,集中インターホン,集合住宅,文字情報,エリア情報)
+		KBN2		区分２（戸建,集合住宅(単独),集合住宅(全体),集中インターホン）
+		Name		名前
+		Person		立場
+		Reason		理由
+		Date		日付
+		Servant		奉仕者
+		Confirm		確認情報
+		Position	場所（ＶＭＬまたはビル内の位置）（エリア情報の場合はVML）
+		Writing		書込み情報・矢印（文字情報も含む）コメント,フォントサイズ,Ｘ位置,Ｙ位置,矢印定義(x1&y1 x2&y2)
+		LastConfirm	最終確認日
+		Frequency	周期間隔
+		Cycle		サイクル番号
+
+●Preaching_Condominiums
+意味：集合住宅の区域に限り、その区域に含まれる物件の定義（何階部分かはPreaching_Buildingsのfloorごとの定義に依存する）
+定義：
+CREATE TABLE Preaching_Condominiums (congnum INTEGER,num INTEGER,seq INTEGER,id TEXT,left INTEGER,top INTEGER);
+項目：
+		congnum		会衆番号
+		num			区域番号
+		seq			地図番号
+		id			物件名
+		left		Ｘ座標
+		top			Ｙ座標
+
+●Preaching_PublicLog
+意味：区域地図の使用履歴
+定義：CREATE TABLE Preaching_PublicLog (congnum INTEGER,num INTEGER,user TEXT,start INTEGER,end INTEGER,endlmt INTEGER,PRIMARY KEY(congnum,num,start));
+項目：	congnum		会衆番号
+		num			区域番号
+		user		使用者名
+		start		開始日
+		end			終了日(0だとまだ終了していない)
+		endlmt		終了期限
+
+●Preaching_Congrigations
+意味：会衆定義
+定義：CREATE TABLE Preaching_Congregations (congnum INTEGER PRIMARY KEY,name TEXT);
+
+●CWUsers
+意味：ユーザー定義
+定義：CREATE TABLE CWUsers (congnum INTEGER,userid TEXT,authority TEXT,PRIMARY KEY(congnum,userid));
+項目：	congnum		会衆番号
+		userid		ユーザー名
+		authority	そのユーザーが持っている権限（複数ある場合は;で区切って並べる）
+
+●CWConfig
+意味：環境設定
+定義：CREATE TABLE CWConfig(congnum INTEGER PRIMARY KEY,AutoEndDefault INTEGER,AutoEndApart INTEGER,BlankMin INTEGER,ChiefClient LONG,RemoteHost TEXT,RemoteUser TEXT,RemotePassword TEXT,RemoteDirectory TEXT);
+
+●Preaching_PersonalList
+意味：個人での奉仕が可能かどうか、区域地図の一覧
+定義：	
+項目：	congnum		会衆番号
+		num			区域番号
+		seq			地図番号
+		name		区域名
+		kbn			区分
+		count		件数
+		limit		終了期日
+		userid		使用者（空欄なら未使用）
+
+
+●Preaching_Buildings
+意味：ビルの構造定義XML（通常アパート、集中インターホン、集合住宅すべてを網羅）
+定義：
+CREATE TABLE Preaching_Buildings (congnum INTEGER,type INTEGER,num INTEGER,seq INTEGER,id TEXT,left INTEGER,top INTEGER,sequences INTEGER,columns INTEGER,XML TEXT);
+
+項目：	congnum		会衆番号
+		type		0:通常アパート 1:集中インターホン 2:集合住宅(moved=true,各フロアにmoved=xx-y属性あり) 
+		num			区域番号（集中インターホンの場合SourceNum,集合住宅の場合ゼロ）
+		seq			地図番号（集中インターホンの場合SourceSeq,集合住宅の場合ゼロ）
+		id			建物名（ここまでがキー項目）
+		left		Ｘ座標（集合住宅の場合ゼロ）
+		top			Ｙ座標（集合住宅の場合ゼロ）
+		sequences	棟数
+		columns		棟横並び数
+		XML			sequence以降のXML文字列
+
+
+
+select num,user,MAX(start),end,endlmt from Preaching_PublicLog where congnum=34173 GROUP BY num;
+区域ごとの最新ログを取得する
+
+
+
+		lastuse		最終使用日
+		nowusing	現在使用中(true=使用中,false=未使用）
+		lastuser	最終使用者
