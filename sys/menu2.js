@@ -34,9 +34,9 @@ function MENU2()
 	tm=today.getMonth()+1;
 	td=today.getDate();
 	tymd=parseInt(ty,10)*10000+parseInt(tm,10)*100+parseInt(td,10);
-	r=ReportLogs();
+	r=ReportLogView();
 	WriteLayer("Stage",r.HTML);
-	document.forms[0].elements[0].value=r.Last;
+	document.forms[0].elements[0].value=SplitDate(r.Last);
 	document.forms[0].elements[1].value=SplitDate(tymd+"");
 	Focus(0);
 	}
@@ -58,8 +58,7 @@ function MENU2Exec()
 	var d2=document.forms[0].elements[1].value;
 	var c1,c2;
 	var s;
-	var tymd;
-	tymd=today.getFullYear()+"/"+(today.getMonth()+1)+"/"+today.getDate();
+	var tymd=today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
 
 	//	入力内容のチェック
 	c1=CheckDate("開始日",d1);
@@ -71,10 +70,16 @@ function MENU2Exec()
 		alert("開始日が終了日より後になっています。");
 		return;
 		}
-	var stream = fso.OpenTextFile(ReportLog(),8,true,-2);
-	stream.WriteLine(tymd+"("+SplitDate(c1)+"～"+SplitDate(c2)+")");
-	stream.close();
 
+	//	レポート作成ログに追記
+	var insobj=new Object();
+	insobj.congnum=congnum;
+	insobj.execdate=tymd;
+	insobj.range_start=c1;
+	insobj.range_end=c2;
+	SQ_Insert("ReportLogs",insobj);
+
+	//	レポートの作成開始
 	LoadAllCards();
 	var y=0;
 	var x=0;
@@ -91,7 +96,7 @@ function MENU2Exec()
 		{
 		s="<div style='position:absolute;width:900px;z-index:5;top:8px;left:1600px;";
 		s+="text-align:right;font-size:40px'>";
-		s+=tymd+"作成("+SplitDate(c1)+"～"+SplitDate(c2)+")</div>";
+		s+=SplitDate(tymd)+"作成("+SplitDate(c1)+"～"+SplitDate(c2)+")</div>";
 		s+="<div style='position:absolute;z-index:2;top:0px;left:0px;'>";
 		for(x=0;x<=4;x++)
 			{
@@ -166,47 +171,40 @@ function MENU2End()
 	MainMenu();
 	}
 //------------------------------------------------------------------------------------
-//	サブルーチン
+//	報告書作成履歴表示の作成
+//  戻り値：オブジェクト
+//      result.HTML=表示するHTML
+//      result.Last=最終作成日＋１
+//      
 //------------------------------------------------------------------------------------
-function ReportLogs()
+function ReportLogView()
 	{
-	var lines=new Array();
-	var maxlogs=0;
-	var logcnt=0;
 	var s;
-	var r=new Object();
-	var first;
-	var p1,p2;
+	var result=new Object();
+	var buf=SQ_Read("ReportLogs","congnum="+congnum,"execdate desc");
 
 	s="<div style='width:400px;height:120px;background-color:#ffaaff;overflow-y:scroll;border:ridge 2px black;padding:4px;'>";
 	s+="<font color=blue><b>報告書作成履歴：</b></font><br><span style='font-size:14px'>";
 
-	first=true;
-	var text=ReadFile(ReportLog());
-	r.Last="";
-	if (text!="")
+	result.Last="";
+
+	if (buf.length>0)
 		{
-		lines = text.split(/\r\n/);
-		maxlogs=lines.length;
-		for(i=maxlogs-1;i>=0;i--)
+		for(i=0;i<buf.length;i++)
 			{
-			if (lines[i]=="") continue;
-			if (first)
+			if (i==0)
 				{
-				p1=lines[i].indexOf("～",0);
-				p2=lines[i].indexOf(")",0);
-				r.Last=AddDays(lines[i].substring(p1+1,p2),1);
-				first=false;
+				result.Last=AddDays(buf[i].range_end,1);
 				}
-			s+=lines[i]+"<br>";
+			s+=SplitDate(buf[i].execdate)+"("+SplitDate(buf[i].range_start)+"～"+SplitDate(buf[i].range_end)+")<br>";
 			}
 		}
 	else{
-		text+="履歴がありません。";
+		s+="履歴がありません。";
 		}
 	s+="</div>";
-	r.HTML=s;
-	return r;
+	result.HTML=s;
+	return result;
 	}
 
 function GetReportDetail(num,date1,date2,x)
@@ -255,11 +253,6 @@ function SplitDate4(dat)
 	d=dat.substring(6,8);
 	s=y+"/"+m+"/"+d;
 	return s;
-	}
-
-function ReportLog()
-	{
-	return DataFolder()+"reportlog.txt";
 	}
 
 function WriteReportCell(x,y,pos,str)

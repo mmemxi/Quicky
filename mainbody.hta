@@ -76,6 +76,9 @@ function boot()
 	basepath=cline.substring(0,i);
 	WshShell.CurrentDirectory=basepath;
 
+	//	SQlite開始
+	SQ_Init("congworks.db");
+
 	//	バージョンチェック
 	ua=navigator.userAgent;
 	p1=ua.indexOf("Trident/",0);
@@ -191,6 +194,9 @@ function boot2()
 	ClearTemporaryFolder();
 	CreateSummaryofApartment();
 	CreateSummaryofAllPerson();		//	全区域のサマリ
+
+	//	SQliteセットアップ
+	SQliteSetup();
 
 	//	メインメニュー
 	MainMenu();
@@ -351,5 +357,7 @@ function GetCommandLine()
 <script src="./sys/personal.js"></script>
 <script src="./sys/newmapeditor.js"></script>
 <script src="./sys/form.js"></script>
+<script src="./sqlite/sqlite.js"></script>
+<script src="./sqlite/setup.js"></script>
 </body>
 </html>

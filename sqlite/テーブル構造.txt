@@ -1,3 +1,23 @@
+================================================================
+2018/10/27から新規作成
+================================================================
+
+●ReportLogs
+作成日：2018/10/27
+意味：報告書作成期間を定義するテーブル
+定義：create table ReportLogs (congnum integer,execdate integer,range_start integer,range_end integer);
+項目：	congnum			会衆番号
+		execdate		実施日
+		range_start		開始日
+		range_end		終了日
+キー：なし（execdateの降順に読む）
+
+
+
+
+================================================================
+過去に作成を試みたもの
+================================================================
 ●Preaching_Campeign
 意味：キャンペーン期間を定義するテーブル
 定義：CREATE TABLE Preaching_Campeign (congnum INTEGER,range_start INTEGER,range_end INTEGER,interval INTEGER);
