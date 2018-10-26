@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="shift-jis"?>
+<HTA:APPLICATION ID="QUICKY"
+APPLICATIONNAME="Quicky"
+BORDER="dialog"
+BORDERSTYLE="static"
+CAPTION="yes"
+INNERBORDER="no"
+MAXIMIZEBUTTON="no"
+MINIMIZEBUTTON="yes"
+SHOWINTASKBAR="yes"
+SINGLEINSTANCE="yes"
+SYSMENU="yes"
+VERSION="3.01"
+WINDOWSTATE="normal"
+SCROLL="no"
+SCROLLFLAT="yes"
+SELECTION="no"
+CONTEXTMENU="no"
+NAVIGABLE="yes"
+/>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=shift-jis">
+<meta HTTP-EQUIV="imagetoolbar" CONTENT="no">
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<link rel=stylesheet href="./sys/default.css">
+<title>Congworks for Ministry</title>
+</head>
+<body onload="boot()">
+<div id="MAIN"></div>
+<script language="JavaScript">
+var Version="3.01";
+var basepath;
+var WshShell = new ActiveXObject("WScript.Shell");
+String.prototype.trim = function()
+	{
+    return this.replace(/^[ ]+|[ ]+$/g, '');
+	}
+String.prototype.trim2 = function()
+	{
+    return this.replace(/^[\"]+|[\"]+$/g, '');
+	}
+//------------------------------------------------------------------------------------------
+function boot()
+	{
+	basepath="c:\\tool\\git\\Quicky";
+	WshShell.CurrentDirectory=basepath;
+	SQ_Init("testtable.db");
+	var i,j,sql;
+
+	var sql="key>='(62)' and key<='(65)'";
+	SQ_Delete("temptable",sql);
+
+/*
+	var dat=new Array();
+	j=0;
+	for(i=60;i<=69;i++)
+		{
+		dat[j]=new Object();
+		dat[j].key="("+i+")";
+		dat[j].data="New Data is "+i+" String.";
+		j++;
+		}
+	SQ_Replace("temptable",dat);
+*/
+
+	var obj=SQ_Read("temptable","key>='(50)' and key<='(70)'","key");
+	var str="";
+	for(i=0;i<obj.length;i++)
+		{
+		str+=obj[i].key+"="+obj[i].data+"<br>";
+		}
+	document.getElementById("MAIN").innerHTML=str;
+	}
+</script>
+<script src="./sqlite/sqlite.js"></script>
+</body>
+</html>

@@ -5,15 +5,16 @@
 // 利用条件
 // ①グローバル変数
 //     basepath      →   sqliteフォルダが存在する基準パス（末尾スラッシュ無）
-//     fso           →   ファイルシステムオブジェクトの宣言必要
 // ②コール順序
-//   (1)SQ_Init("データベースファイル名");
+//   SQ_Init("データベースファイル名");
 //                   →   指定したファイル名を対象とする
 //                        ※sqliteフォルダに存在すること
 //------------------------------------------------------------
 // グローバル変数
 //------------------------------------------------------------
 var SQ_table="";
+var SQfso=new ActiveXObject("Scripting.FileSystemObject");
+var SQWshShell = new ActiveXObject("WScript.Shell");
 //------------------------------------------------------------
 // 定数の設定
 //------------------------------------------------------------
@@ -28,7 +29,6 @@ function SQ_Init(dbname)
 	{
 	var dir="";
 	if ((dbname=="")||(dbname==null))	return false;
-	if (!fso.FileExists(SQ_Folder()+"\\"+dbname))	return false;
 	SQ_table=dbname;
 	return true;
 	}
@@ -47,7 +47,7 @@ function SQ_Folder()
 function SQ_TempFolder()
 	{
 	var dir="c:\\temp\\quicky\\sqlite";
-	if (!fso.FolderExists(dir)) fso.CreateFolder(dir,true);
+	if (!SQfso.FolderExists(dir)) SQfso.CreateFolder(dir);
 	return dir;
 	}
 //-----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ function SQ_Read(sql_table,sql_where,sql_order)
 	if (SQ_table=="") return result;
 
 	//	入出力ファイル名の準備
-	var cd=WshShell.CurrentDirectory;
+	var cd=SQWshShell.CurrentDirectory;
 	var now=new Date();
 	var filetime=now.getMinutes()*100000+now.getSeconds()*1000+now.getMilliseconds();
 	var inpfile=SQ_TempFolder()+"SQLin"+filetime+".txt";
@@ -81,14 +81,14 @@ function SQ_Read(sql_table,sql_where,sql_order)
 	SQ_WriteUTF8(inpfile,buf);
 
 	//	SQliteの実行
-	WshShell.CurrentDirectory=SQ_Folder();
-	WshShell.Run(cmd,0,true);
-	WshShell.CurrentDirectory=cd;
+	SQWshShell.CurrentDirectory=SQ_Folder();
+	SQWshShell.Run(cmd,0,true);
+	SQWshShell.CurrentDirectory=cd;
 
 	//	処理結果の取得
 	buf=SQ_ReadUTF8(outfile);
-	if (fso.FileExists(inpfile)){try{fso.DeleteFile(inpfile,true);}catch(e){}};
-	if (fso.FileExists(outfile)){try{fso.DeleteFile(outfile,true);}catch(e){}};
+	if (SQfso.FileExists(inpfile)){try{SQfso.DeleteFile(inpfile,true);}catch(e){}};
+	if (SQfso.FileExists(outfile)){try{SQfso.DeleteFile(outfile,true);}catch(e){}};
 
 	//	処理結果の分解
 	if (buf=="") return result;
@@ -121,10 +121,10 @@ function SQ_Exec(sqlArray)
 	var i=0,s,o,sql,buf="";
 
 	//	初期化していなければエラー
-	if (SQ_table=="") return result;
+	if (SQ_table=="") return;
 
 	//	入出力ファイル名の準備
-	var cd=WshShell.CurrentDirectory;
+	var cd=SQWshShell.CurrentDirectory;
 	var now=new Date();
 	var filetime=now.getMinutes()*100000+now.getSeconds()*1000+now.getMilliseconds();
 	var inpfile=SQ_TempFolder()+"SQLin"+filetime+".txt";
@@ -144,10 +144,10 @@ function SQ_Exec(sqlArray)
 	SQ_WriteUTF8(inpfile,buf);
 
 	//	SQliteの実行
-	WshShell.CurrentDirectory=SQ_Folder();
-	WshShell.Run(cmd,0,true);
-	WshShell.CurrentDirectory=cd;
-	if (fso.FileExists(inpfile)){try{fso.DeleteFile(inpfile,true);}catch(e){}};
+	SQWshShell.CurrentDirectory=SQ_Folder();
+	SQWshShell.Run(cmd,0,true);
+	SQWshShell.CurrentDirectory=cd;
+	if (SQfso.FileExists(inpfile)){try{SQfso.DeleteFile(inpfile,true);}catch(e){}};
 	}
 //-----------------------------------------------------------------------------
 function SQ_Insert(sql_table,writeObj)
