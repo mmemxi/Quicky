@@ -22,6 +22,8 @@ function OpenConfig()
 	{
 	var s=ReadXMLFile(IniXML("all"),false);
 	var tmpobj=new Object();
+	var token1,token2,t1,t2;
+
 	if (s!="") ConfigAll=clone(s);
 	if (!("Campeigns" in ConfigAll))
 		{
@@ -37,6 +39,22 @@ function OpenConfig()
 		}
 	s=ReadXMLFile(IniXML("local"),false);
 	if (s!="") ConfigLocal=clone(s);
+
+	//	ÉgÅ[ÉNÉìÇ™Ç»ÇØÇÍÇŒê∂ê¨Ç∑ÇÈ
+	if (!("TokenID" in ConfigLocal))
+		{
+		while(1==1)
+			{
+			token1=SQ_Read("CWTokens","","");
+			SQ_Exec("update CWTokens set TokenNo=TokenNo+1;");
+			token2=SQ_Read("CWTokens","","");
+			t1=parseInt(token1[0].TokenNo,10);
+			t2=parseInt(token2[0].TokenNo,10);
+			if (t1+1==t2) break;
+			}
+		ConfigLocal.TokenID=FixValue(token2[0].TokenNo,8);
+		WriteXMLFile(ConfigLocal,IniXML("local"));
+		}
 	}
 function CloseConfig()
 	{
