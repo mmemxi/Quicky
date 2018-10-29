@@ -16,6 +16,7 @@ $num=$_COOKIE["CWPerson_num"];
 $seq=$_COOKIE["CWPerson_seq"];
 $name=$_COOKIE["CWPerson_name"];
 $names=mb_convert_encoding($name,"SJIS-WIN","UTF8");
+$CWToken=$_COOKIE["CWToken"];
 ?>
 </head>
 <body>
@@ -28,16 +29,21 @@ var UserID=Cookies["CWPerson_UserID"];
 var num=Cookies["CWPerson_num"];
 var seq=Cookies["CWPerson_seq"];
 var name=Cookies["CWPerson_name"];
+var CWToken=Cookies["CWToken"];
 document.write(congname+"("+congnum+")");
 document.write("／ユーザー名："+UserID+"<br>");
 </script>
 <img src='./img/lines/ライン１.png'><br>
 </div>
+<?php
+print "No." . $num . "-" . $seq . "：「" . $name . "」の詳細<br>";
+?>
 <div>
 <?php
-exec("cmd.exe /c start viewA.bat $congnum:$UIDS:$num:$seq:$names");
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\viewA.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
+$dirname = pathinfo(__FILE__, PATHINFO_DIRNAME);
+exec("cscript " . $cwpath . "viewA.wsf $congnum:$UIDS:$num:$seq:$names $dirname //Nologo",$out);
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
 	echo "Quickyシステムが起動していません。<br>区域係の兄弟にお問い合わせください。<br><br>";

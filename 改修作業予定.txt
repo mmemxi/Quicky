@@ -19,44 +19,39 @@
 	mainbody.hta					バージョン表記修正のみ
 	\sys\config.js					ローカルコンフィグOpen時、ConfigLocal.TokenIDがなければ生成して保存。
 	\congworks\getcwtoken.wsf		新設。８桁のトークンを生成して標準出力に返す。
-	xampp\htdocs\index.php			CookieにCWTokenがあるかチェックし、なければ生成。次画面移行時にCookieに保存。
-	xampp\htdocs\mylist.php			CookieからCWTokenを取得し表示。テキストファイルを介さないよう変更。
-	xampp\htdocs\pp\index.php		CookieにCWTokenがあるかチェックし、なければ生成。次画面移行時にCookieに保存。
-	xampp\htdocs\pp\newlist.php		CookieからCWTokenを取得し表示。テキストファイルを介さないよう変更。
-	xampp\htdocs\mylist.bat			廃止。
-	xampp\htdocs\pp\newlist.bat		廃止。
-
-	※以下、未作業
 	xampp\htdocs\congworks\以下
-	viewA.php
-	viewB.php
-	requestA.php
-	requestB.php
-	rentA.php
-	rentB.php
-	faultA.php
-	faultB.php
-	print.php
-	cancel.php
-	download.php
-	viewA.bat				廃止
-	viewB.bat				廃止
-	requestA.bat			廃止
-	requestB.bat			廃止
-	rentA.bat				廃止
-	rentB.bat				廃止
-	print.bat				廃止
-	download.bat			廃止
-	cancel.bat				廃止
+	index.php						CookieにCWTokenがあるかチェックし、なければ生成。次画面移行時にCookieに保存。
+	mylist.php						テキストファイルを介さないよう変更
+	viewA.php						テキストファイルを介さないよう変更
+	viewB.php						テキストファイルを介さないよう変更
+	rentA.php						テキストファイルを介さないよう変更
+	rentB.php						テキストファイルを介さないよう変更
+	cancel.php						テキストファイルを介さないよう変更
+	download.php					テキストファイルを介さないよう変更
+	requestA.php					テキストファイルを介さないよう変更
+	requestB.php					テキストファイルを介さないよう変更
+	print.php						テキストファイルを介さないよう変更
+	mylist.bat						廃止
+	viewA.bat						廃止
+	viewB.bat						廃止
+	rentA.bat						廃止
+	rentB.bat						廃止
+	download.bat					廃止
+	cancel.bat						廃止
+	requestA.bat					廃止
+	requestB.bat					廃止
+	print.bat						廃止
 
 	xampp\htdocs\congworks\pp以下
-	verify.php
-	rent.php
-	fault.php
-	cancelpp.php
-	verify.bat				廃止
-	rent.bat				廃止
-	cancelpp.bat			廃止
+	index.php						CookieにCWTokenがあるかチェックし、なければ生成。次画面移行時にCookieに保存。
+	newlist.php						テキストファイルを介さないよう変更
+	verify.php						テキストファイルを介さないよう変更
+	rent.php						テキストファイルを介さないよう変更
+	cancelpp.php					テキストファイルを介さないよう変更
+	newlist.bat						廃止
+	verify.bat						廃止
+	rent.bat						廃止
+	cancelpp.bat					廃止
 
 
 ※とりあえずトークンは生成するが、まだ何も使用しない。
@@ -99,4 +94,5 @@
 ・アパートログをSQlite化
 ・区域ログをSQlite化
 ・個人ログをSQlite化
-
+・アパート区域、前回から-1日が対象になっていないバグを修正
+・congworksで会衆の区域を出しても、Quickyで会衆の区域リストが更新されていないバグを修正

@@ -32,6 +32,9 @@ var Building=new Object();
 var Markers;
 var tmk;
 var Spots=new Array();
+var cd=fso.getParentFolderName(WScript.ScriptFullName);
+cd=cd.replace("congworks","");
+WshShell.CurrentDirectory=cd;
 //----------------------------------------------------------------
 var congnum=WScript.Arguments(0);
 var Pnum=WScript.Arguments(1);

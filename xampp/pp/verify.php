@@ -16,6 +16,8 @@ if (isset($_COOKIE['CWPP_congname']))	$congname=$_COOKIE["CWPP_congname"];
 	else $congname="";
 if (isset($_COOKIE['CWPP_num']))		$num=$_COOKIE["CWPP_num"];
 	else $num="";
+if (isset($_COOKIE['CWToken']))	$CWToken=$_COOKIE["CWToken"];
+	else $CWToken="unknown";
 ?>
 </head>
 <body onload="Boot()">
@@ -26,6 +28,7 @@ var congnum=Cookies["CWPP_congnum"];
 var congname=Cookies["CWPP_congname"];
 var UserID=Cookies["CWPP_UserID"];
 var num=Cookies["CWPP_num"];
+var CWToken=Cookies["CWToken"];
 document.write(congname+"("+congnum+")");
 document.write("／ユーザー名："+UserID+"<br>");
 </script>
@@ -33,27 +36,29 @@ document.write("／ユーザー名："+UserID+"<br>");
 </div>
 <div id="LayerO" style="visibility:hidden;width:1px;height:1px;"><?php
 echo "<textarea id=\"PHP1\">";
-exec("cmd.exe /c start verify.bat " . $congnum . " " . $num);
-$body=file_get_contents("verify.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
-$tbl=explode("\n",$body);
-echo $tbl[0];
+$cwpath=file_get_contents('../quicky.txt', true) . "\\congworks\\";
+exec("cscript " . $cwpath . "verify.wsf $congnum $num //Nologo",$out);
+for($i=0;$i<count($out);$i++)
+	{
+	$out[$i]=mb_convert_encoding($out[$i],"UTF8","SJIS-WIN");
+	}
+echo $out[0];
 echo "</textarea>";
 echo "<textarea id=\"PHP4\">";
-echo $tbl[1];
+echo $out[1];
 echo "</textarea>";
 ?></div>
 <?php
-print "<b>" . $tbl[0] . "の貸し出し:</b><br>";
+print "<b>" . $out[0] . "の貸し出し:</b><br>";
 ?>
 <table style="width:400px;margin:20px;" border=0 cellspacing=0 cellpadding=0>
 <tr><td valign=middle style="border:2px dashed red;padding:6px;height:50px;">
 <form>使用者：<select size=1>
 <?php
 print "<option value=''>自分（今操作しているあなた）</option>";
-for($i=2;$i<count($tbl)-1;$i++)
+for($i=3;$i<count($out);$i++)
 	{
-	print "<option value='" . $tbl[$i] . "'>" . $tbl[$i] . "</option>";
+	print "<option value='" . $out[$i] . "'>" . $out[$i] . "</option>";
 	}
 ?>
 </select></form></td></tr>
@@ -233,8 +238,8 @@ function isBeforeCampeign(today)
 	if (Campeigns.length<1) return false;
 	for(i=0;i<Campeigns.length;i++)
 		{
-		if (day>=Campeigns[i].Start) continue;
-		nisu=CalcDays(day,Campeigns[i].End);
+		if (today>=Campeigns[i].Start) continue;
+		nisu=CalcDays(today,Campeigns[i].End);
 		if ((nisu>0)&&(nisu<=14)) {r=true;break;}
 		}
 	return r;

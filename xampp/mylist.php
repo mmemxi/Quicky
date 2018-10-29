@@ -28,7 +28,7 @@ var congname=Cookies["CWPerson_congname"];
 var UserID=Cookies["CWPerson_UserID"];
 var CWToken=Cookies["CWToken"];
 document.write(congname+"("+congnum+")");
-document.write("／ユーザー名："+UserID+"("+CWToken+")<br>");
+document.write("／ユーザー名："+UserID+"<br>");
 </script>
 <img src='./img/lines/ライン１.png'><br>
 </div>

@@ -6,9 +6,11 @@ $pdf=mb_convert_encoding($pdf,"SJIS-WIN","UTF8");
 $congnum=$_COOKIE["CWPerson_congnum"];
 $userid=$_COOKIE["CWPerson_UserID"];
 $userids=mb_convert_encoding($userid,"SJIS-WIN","UTF8");
+$CWToken=$_COOKIE["CWToken"];
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 
-exec("cmd.exe /c start cancel.bat $congnum $userids $pdf");
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\cancel.txt");
+exec("cscript " . $cwpath . "cancel.wsf $congnum $userids $pdf //Nologo",$out);
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
 	echo "Quickyシステムが起動していません。<br>区域係の兄弟にお問い合わせください。<br><br>";

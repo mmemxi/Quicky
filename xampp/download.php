@@ -6,12 +6,14 @@ $pdf=mb_convert_encoding($pdf,"SJIS-WIN","UTF8");
 $congnum=$_COOKIE["CWPerson_congnum"];
 $userid=$_COOKIE["CWPerson_UserID"];
 $userids=mb_convert_encoding($userid,"SJIS-WIN","UTF8");
+$CWToken=$_COOKIE["CWToken"];
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 
 // ファイルダウンロード処理
-exec("cmd.exe /c start download.bat $congnum $userids $pdf");
+$dirname = pathinfo(__FILE__, PATHINFO_DIRNAME);
+exec("cscript " . $cwpath . "download.wsf $congnum $userids $pdf $dirname //Nologo",$out);
 // 生成したファイル名を取得
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\download.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
 	echo "Quickyシステムが起動していません。<br>区域係の兄弟にお問い合わせください。<br><br>";

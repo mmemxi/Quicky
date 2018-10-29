@@ -8,13 +8,14 @@ if (isset($_COOKIE['CWPerson_congnum']))	$congnum=$_COOKIE["CWPerson_congnum"];
 if (isset($_COOKIE['CWPerson_UserID']))		$userid=$_COOKIE["CWPerson_UserID"];
 	else $userid="";
 $userids=mb_convert_encoding($userid,"SJIS-WIN","UTF8");
+$CWToken=$_COOKIE["CWToken"];
 
 // 印刷処理実行
-exec("cmd.exe /c start print.bat $congnum $userids $pdf");
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
+exec("cscript " . $cwpath . "print.wsf $congnum $userids $pdf //Nologo",$out);
 
 // 印刷結果確認
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\print.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "Error:NoQue")
 	{
 	echo "印刷フォルダが存在しません。<br>管理者にお問い合わせください。<br><br>";

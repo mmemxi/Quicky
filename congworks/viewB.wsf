@@ -15,7 +15,7 @@ var Building=new Object();
 var Markers;
 //----------------------------------------------------------------
 var targetstr=WScript.Arguments(0);
-var xampp=WScript.Arguments(1);
+var xampp=WScript.Arguments(1)+"\\";
 //----------------------------------------------------------------
 	targetstr=targetstr.trim();
 	targetstr=targetstr.replace("_"," ");

@@ -15,6 +15,7 @@ if (isset($_COOKIE['CWPerson_congnum']))	$congnum=$_COOKIE["CWPerson_congnum"];
 	else $congnum="";
 if (isset($_COOKIE['CWPerson_congname']))	$congname=$_COOKIE["CWPerson_congname"];
 	else $congname="";
+$CWToken=$_COOKIE["CWToken"];
 ?>
 </head>
 <body>
@@ -24,6 +25,7 @@ if (isset($_COOKIE['CWPerson_congname']))	$congname=$_COOKIE["CWPerson_congname"
 var congnum=Cookies["CWPerson_congnum"];
 var congname=Cookies["CWPerson_congname"];
 var UserID=Cookies["CWPerson_UserID"];
+var CWToken=Cookies["CWToken"];
 document.write(congname+"("+congnum+")");
 document.write("／ユーザー名："+UserID+"<br>");
 </script>
@@ -31,9 +33,9 @@ document.write("／ユーザー名："+UserID+"<br>");
 </div>
 <div>
 <?php
-exec("cmd.exe /c start requestB.bat $congnum $UIDS");
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\requestB.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
+exec("cscript " . $cwpath . "requestB.wsf $congnum $UIDS //Nologo",$out);
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
 	echo "Quickyシステムが起動していません。<br>区域係の兄弟にお問い合わせください。<br><br>";

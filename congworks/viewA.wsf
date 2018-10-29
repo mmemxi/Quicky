@@ -11,7 +11,7 @@
 // ˆø”‚QXAMPPƒtƒHƒ‹ƒ_–¼
 //----------------------------------------------------------------
 var targetstr=WScript.Arguments(0);
-var xampp=WScript.Arguments(1);
+var xampp=WScript.Arguments(1)+qt;
 //----------------------------------------------------------------
 	targetstr=targetstr.trim();
 	targetstr=targetstr.replace("_"," ");

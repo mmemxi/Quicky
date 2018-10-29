@@ -7,11 +7,12 @@ $num=$_COOKIE["CWPerson_num"];
 $seq=$_COOKIE["CWPerson_seq"];
 $name=$_COOKIE["CWPerson_name"];
 $names=mb_convert_encoding($name,"SJIS-WIN","UTF8");
+$CWToken=$_COOKIE["CWToken"];
+$cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 $target=$congnum . ":" . $UIDS . ":" . $num . ":" . $seq . ":" . $names;
 //	会衆番号、ユーザー名、区域番号、地図番号、物件名
-exec("cmd.exe /c start rentA.bat $target");
-$body=file_get_contents("c:\\xampp\\htdocs\\congworks\\rentA.txt");
-$body=mb_convert_encoding($body,"UTF8","SJIS-WIN");
+exec("cscript " . $cwpath . "rentA.wsf $target //Nologo",$out);
+$body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
 	echo "Quickyシステムが起動していません。<br>区域係の兄弟にお問い合わせください。<br><br>";
