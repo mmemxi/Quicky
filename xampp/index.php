@@ -70,7 +70,7 @@ echo "</script>";
 
 if (isset($_COOKIE['CWToken']))		$CWToken=$_COOKIE["CWToken"];
 else	{
-		exec("cscript " . $cwpath . "getcwtoken.wsf //Nologo",$out);
+		exec("cscript \"" . $cwpath . "getcwtoken.wsf\" //Nologo",$out);
 		$CWToken=$out[0];
 		}
 echo "<script type='text/javascript'>";

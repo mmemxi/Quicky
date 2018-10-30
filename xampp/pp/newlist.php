@@ -35,7 +35,7 @@ document.write("／ユーザー名："+UserID+"<br>");
 <div id="LayerO" style="visibility:hidden;width:1px;height:1px;"><?php
 echo "<textarea id=\"PHP1\">";
 $cwpath=file_get_contents('../quicky.txt', true) . "\\congworks\\";
-exec("cscript " . $cwpath . "newlist.wsf $congnum $UID  //Nologo",$out);
+exec("cscript \"" . $cwpath . "newlist.wsf\" $congnum $UID  //Nologo",$out);
 for($i=0;$i<count($out);$i++)
 	{
 	$body=mb_convert_encoding($out[$i],"UTF8","SJIS-WIN");

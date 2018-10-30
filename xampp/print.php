@@ -12,7 +12,7 @@ $CWToken=$_COOKIE["CWToken"];
 
 // 印刷処理実行
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
-exec("cscript " . $cwpath . "print.wsf $congnum $userids $pdf //Nologo",$out);
+exec("cscript \"" . $cwpath . "print.wsf\" $congnum $userids $pdf //Nologo",$out);
 
 // 印刷結果確認
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");

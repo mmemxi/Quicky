@@ -11,7 +11,7 @@ $CWToken=$_COOKIE["CWToken"];
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 $target=$congnum . ":" . $UIDS . ":" . $num . ":" . $seq . ":" . $names;
 //	会衆番号、ユーザー名、区域番号、地図番号、物件名
-exec("cscript " . $cwpath . "rentA.wsf $target //Nologo",$out);
+exec("cscript \"" . $cwpath . "rentA.wsf\" $target //Nologo",$out);
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{

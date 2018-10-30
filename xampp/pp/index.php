@@ -26,7 +26,7 @@ if (isset($_COOKIE['CWPP_congnum']))	$congnum=$_COOKIE["CWPP_congnum"];
 	else $congnum="";
 $qtxt=file_get_contents('../quicky.txt', true);
 $qpath=$qtxt . "\\data";
-$cwpath=$qtxt . "\\congworks";
+$cwpath=$qtxt . "\\congworks\\";
 $dirs = scandir($qpath);
 $conglist="";
 $congnames="";
@@ -70,7 +70,7 @@ echo "</script>";
 
 if (isset($_COOKIE['CWToken']))		$CWToken=$_COOKIE["CWToken"];
 else	{
-		exec("cscript " . $cwpath . "\\getcwtoken.wsf //Nologo",$out);
+		exec("cscript \"" . $cwpath . "getcwtoken.wsf\" //Nologo",$out);
 		$CWToken=$out[0];
 		}
 echo "<script type='text/javascript'>";

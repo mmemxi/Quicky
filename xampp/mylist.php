@@ -35,7 +35,7 @@ document.write("／ユーザー名："+UserID+"<br>");
 <div>
 <?php
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
-exec("cscript " . $cwpath . "mylist.wsf $congnum $UIDS  //Nologo",$out);
+exec("cscript \"" . $cwpath . "mylist.wsf\" $congnum $UIDS  //Nologo",$out);
 $nolist=true;
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")

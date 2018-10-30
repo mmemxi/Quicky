@@ -11,7 +11,7 @@ $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 
 // ファイルダウンロード処理
 $dirname = pathinfo(__FILE__, PATHINFO_DIRNAME);
-exec("cscript " . $cwpath . "download.wsf $congnum $userids $pdf $dirname //Nologo",$out);
+exec("cscript \"" . $cwpath . "download.wsf\" $congnum $userids $pdf $dirname //Nologo",$out);
 // 生成したファイル名を取得
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")

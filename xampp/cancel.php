@@ -9,7 +9,7 @@ $userids=mb_convert_encoding($userid,"SJIS-WIN","UTF8");
 $CWToken=$_COOKIE["CWToken"];
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 
-exec("cscript " . $cwpath . "cancel.wsf $congnum $userids $pdf //Nologo",$out);
+exec("cscript \"" . $cwpath . "cancel.wsf\" $congnum $userids $pdf //Nologo",$out);
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{

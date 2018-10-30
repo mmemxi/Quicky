@@ -42,7 +42,7 @@ print "No." . $num . "-" . $seq . "：「" . $name . "」の詳細<br>";
 <?php
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
 $dirname = pathinfo(__FILE__, PATHINFO_DIRNAME);
-exec("cscript " . $cwpath . "viewB.wsf $congnum:$UIDS:$num:$seq:$names $dirname //Nologo",$out);
+exec("cscript \"" . $cwpath . "viewB.wsf\" $congnum:$UIDS:$num:$seq:$names $dirname //Nologo",$out);
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")
 	{
