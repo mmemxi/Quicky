@@ -97,6 +97,42 @@ function RemoveMyMap(userid,kbn,num,seq,name)
 	WriteXMLFile(obj,mybook);
 	}
 //----------------------------------------------------------------
+// 指定した地図のPDFファイル名（フルパス）を返す
+// アパートの場合　　：Id＝アパート名
+// 個人用留守宅の場合：Id=空白
+// 見つからなければヌル値を返す
+//----------------------------------------------------------------
+function GetMyMap(num,seq,Id,userid)
+	{
+	var personalpath=PersonalFolder();
+	var mypath=personalpath+userid+qt;
+	if (!fso.FolderExists(mypath)) return "";
+	var mybook=mypath+"mybook.xml";
+	if (!fso.FileExists(mybook)) return "";
+	var obj=ReadXMLFile(mybook);
+	if (!("Map" in obj)) return "";
+	var i;
+	var result="";
+	for(i=0;i<obj.Map.length;i++)
+		{
+		if (num!="")
+			{
+			if (obj.Map[i].num!=num) continue;
+			}
+		if (seq!="")
+			{
+			if (obj.Map[i].seq!=seq) continue;
+			}
+		if (Id!="")
+			{
+			if (obj.Map[i].name!=Id) continue;
+			}
+		result=mypath+obj.Map[i].pdf;
+		break;
+		}
+	return result;
+	}
+//----------------------------------------------------------------
 // 指定された区域が使用可能かどうかを返すisAvailable
 // kbn=A:集中インターホン B:長期留守宅
 // num,seq=区域番号、地図番号

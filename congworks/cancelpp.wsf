@@ -26,10 +26,15 @@ LoadCard(congnum,num);
 var obj=LoadLog(congnum,num);
 if (obj.Status!="Using")		//	使用中でない
 	{
+	WScript.StdOut.Write("ng");
 	WScript.quit();
 	}
 var l=obj.History.length;
-if (l==0)	WScript.quit();	//	ログが無い
+if (l==0)
+	{
+	WScript.StdOut.Write("ng");
+	WScript.quit();	//	ログが無い
+	}
 obj.History.splice(l-1,1);
 SetLogSummary(obj);
 SaveLog(obj,congnum,num);
@@ -61,6 +66,7 @@ if (j>0)	SaveConfig(congnum,num);
 // 個人用留守宅情報の更新
 CreateSummaryofPerson(congnum,num,true);
 //----------------------------------------------------------------
+WScript.StdOut.Write("ok");
 WScript.quit();
 //----------------------------------------------------------------
 function LoadCard(congnum,num)

@@ -133,7 +133,7 @@ function MENU6A()
 				trfunc=" style='cursor:pointer;' onclick='MENU6Big("+num+","+j+")' title='この地図を貸出します'";
 				}
 			else{
-				trfunc=" style='cursor:pointer;' onclick='MENU6Return("+num+","+j+")' title='この地図の貸出を取り消します'";
+				trfunc=" style='cursor:pointer;' onclick='MENU6Return("+num+","+j+",\""+mmap[j].User+"\")' title='この地図の貸出を取り消します'";
 				}
 			s+="<tr>";
 			s+="<td align=right"+trfunc+">"+num+"</td>";				//	区域番号
@@ -278,49 +278,46 @@ function MENU6_Start_Exec(num,seq)
 		return;
 		}
 
-	Markers=LoadMarker(num);
-	counts=0;
-	if (Markers.Count>0)
-		{
-		Markers.Map[seq].User=a;
-		SaveMarker(num,Markers);
-		for(j=0;j<Markers.Map[seq].Points.length;j++)
-			{
-			vhist=parseInt(Markers.Map[seq].Points[j].History,10);
-			if (vhist==2) counts++;
-			}
-		}
-	overday=GetOverDay(num);
-
-	text=ReadFile(UserFile2());
-	if (text.indexOf(a,0)==-1)
-		{
-		stream = fso.OpenTextFile(UserFile2(),8,true,-2);
-		stream.WriteLine(a);
-		stream.close();
-		}
+	//	外部プログラムとして呼び出す
 	ClearLayer("Stage");
-	WriteLayer("Stage","印刷中です…");
-	var pdffile=AddMyMap(a,"B",num,seq,0,counts,overday);
-	PrintMarkerMap(num,seq,pdffile);
-	CreateSummaryofPerson(num,true);
+	WriteLayer("Stage","処理中です…");
+	cmd="rentB.wsf "+congnum+":"+a+":"+num+":"+seq;
+	var objResult=RunWSF(cmd);
+	if (objResult!="ok")
+		{
+		alert("長期留守宅貸し出し処理中にエラーが発生し、処理が失敗しました。");
+		}
+
+	var pdffile=GetMyMap(num,seq,"",a);
+	if (pdffile=="")
+		{
+		alert("貸し出し地図の印刷に失敗しました。");
+		}
+	else{
+		PrintMarkerMap(num,seq,pdffile);
+		}
 	MENU6A();
 	}
 
-function MENU6Return(num,seq)
+function MENU6Return(num,seq,userid)
 	{
-	var cmf,i,user;
+	var cmf,userid,pdffile;
 	cmf=confirm("№"+num+"「"+Cards[num].name+"」－"+nums.charAt(seq-1)+"の貸出を取り消しますか？");
 	if (!cmf) return;
-	Markers=LoadMarker(num);
-	if (Markers.Count>0)
+
+	//	PDFファイル名を取得する
+	pdffile=GetMyMap(num,seq,"",userid);
+	pdffile=fso.GetFileName(pdffile);
+
+	//	外部プログラムとして呼び出す
+	ClearLayer("Stage");
+	WriteLayer("Stage","処理中です…");
+	cmd="cancel.wsf "+congnum+" "+userid+" "+pdffile;
+	var objResult=RunWSF(cmd);
+	if (objResult.indexOf("NO=",0)!=-1)
 		{
-		user=Markers.Map[seq].User;
-		Markers.Map[seq].User="";
-		SaveMarker(num,Markers);
+		alert("長期留守宅返却処理中にエラーが発生し、処理が失敗しました。");
 		}
-	CreateSummaryofPerson(num,true);
-	RemoveMyMap(user,"B",num,seq,"");
 	MENU6A();
 	}
 //------------------------------------------------------------------------------------

@@ -1011,12 +1011,11 @@ function CheckDate(label,b)
 
 function MENU1E_Start_Exec(num)
 	{
-	var a,b,bcnt,bp,bp2,cmf,obj,l;
-	var ymd;
+	var a,b,ymd;
 	var stream,text,s;
 	var overday;
-	var BTB,i,j;
 	var LimitStartDay=GetAvailableDate(num);	//	この日以降が使用可能である日付を取得
+	var cmd;
 
 	a=document.forms[0].elements[0].value;	//　使用者
 	b=document.forms[0].elements[1].value;	//	貸出日
@@ -1042,76 +1041,20 @@ function MENU1E_Start_Exec(num)
 		alert("キャンペーン期間の２週間前からは新規開始できません。");
 		return;
 		}
-	if (overcampeign != 0)
+
+	//	外部プログラムとして呼び出す
+	ClearLayer("Stage");
+	WriteLayer("Stage","処理中です…");
+	cmd="rent.wsf "+congnum+" "+num+" "+ymd+" "+a;
+	var objResult=RunWSF(cmd);
+	if (objResult!="ok")
 		{
-		overday=overcampeign;						//	キャンペーン前日で終了する
+		alert("貸し出し処理中にエラーが発生し、貸出処理が失敗しました。");
 		}
-	//	2018/1/19 キャンペーンルール改修
-	// 2018/6/27追加 -----------------------------------
-	if (isCampeign(ymd))	overday=AddDays(ymd,ConfigAll.AutoEndCampeign);	//	ｷｬﾝﾍﾟｰﾝ期間中の自動終了日数
-	// 2018/6/27追加 -----------------------------------
-
-	//	ログ更新
-	obj=LoadLog(num);
-	AddLog(obj,num,a,ymd,overday);
-	SaveLog(obj,num);
-
-	//	マーカーの送り処理
-	PushMarkerHistory(num);		//	20170514追加
-	Markers=LoadMarker(num);
-	if (Markers.Count>0)
-		{
-		IncMarkerHistory();
-		SaveMarker(num,Markers);
-		}
-
-	//	特記情報のサイクル加算
-	BTB=Cards[num].RTB;
-	j=0;
-	for(i=0;i<BTB.length;i++)
-		{
-		if ((BTB[i].KBN1=="拒否")&&("Frequency" in BTB[i]))
-			{
-			if (BTB[i].Frequency!=0)
-				{
-				j++;
-				BTB[i].Cycle++;
-				if (BTB[i].Cycle>BTB[i].Frequency) BTB[i].Cycle=1;
-				}
-			}
-		}
-	if (j>0)	SaveConfig(num);
-
-	//	使用者名マスターに追加
-	text=ReadFile(UserFile());
-	if (text.indexOf(a,0)==-1)
-		{
-		stream = fso.OpenTextFile(UserFile(),8,true,-2);
-		stream.WriteLine(a);
-		stream.close();
-		}
-
 	LoadCard(num);
-	CreateSummaryofPerson(num,true);
-	s="("+num+")"+Cards[num].name;
-	s+="、貸出日＝"+SplitDate(ymd)+"、終了期限＝"+SplitDate(overday)+"、使用者＝"+a;
-
-	cmf=confirm("№"+num+"「"+Cards[num].name+"」の地図をすべて印刷しますか？");
-	if (cmf)
-		{
-		ClearLayer("Stage");
-		WriteLayer("Stage","印刷中です…");
-		setTimeout("MENU1E_Print("+num+")",10);
-		}
-	else MENU1EExit();
-	}
-
-function MENU1E_Print(num,overday)
-	{
-	var a=false;
-	PrintMap(num,0);
 	MENU1EExit();
 	}
+
 
 function MENU1E_Start_RollBack(num)
 	{
@@ -1400,47 +1343,20 @@ function MENU1E_Complete_Exec(num)
 
 function MENU1E_End_Cancel(num)
 	{
-	var a,s;
-	var obj,l;
-	var BTB,i,j;
+	var a,cmd;
 	a=confirm("№"+num+"「"+Cards[num].name+"」の使用中状態を取り消します。よろしいですか？");
 	if (!a) return;
-	obj=LoadLog(num);
-	l=obj.History.length;
-	if (l==0)
-		{
-		alert("ログ情報が異常です。\n処理できません。");
-		return;
-		}
-	obj.History.splice(l-1,1);
-	SetLogSummary(obj);
-	SaveLog(obj,num);
-	//	マーカーの戻し処理
-	s=PopMarkerHistory(num);		//	20170514追加
-	Markers=LoadMarker(num);
-	if (Markers.Count>0)
-		{
-		DecMarkerHistory();
-		SaveMarker(num,Markers);
-		}
-	//	特記情報のサイクル戻し
-	BTB=Cards[num].RTB;
-	j=0;
-	for(i=0;i<BTB.length;i++)
-		{
-		if ((BTB[i].KBN1=="拒否")&&("Frequency" in BTB[i]))
-			{
-			if (BTB[i].Frequency!=0)
-				{
-				j++;
-				BTB[i].Cycle--;
-				if (BTB[i].Cycle<1) BTB[i].Cycle=BTB[i].Frequency;
-				}
-			}
-		}
-	if (j>0)	SaveConfig(num);
 
-	s="("+num+")"+Cards[num].name;
+	//	外部プログラムとして呼び出す
+	ClearLayer("Stage");
+	WriteLayer("Stage","処理中です…");
+	cmd="cancelpp.wsf "+congnum+" "+num;
+	var objResult=RunWSF(cmd);
+	if (objResult!="ok")
+		{
+		alert("ロールバック処理中にエラーが発生し、ロールバック処理が失敗しました。");
+		}
+
 	LoadCard(num);
 	CreateSummaryofPerson(num,true);
 	MENU1EExit();

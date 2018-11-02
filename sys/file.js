@@ -217,3 +217,14 @@ function CreateFolders(foldername)
 		fso.CreateFolder(foldername);
 		}
 	}
+//------------------------------------------------------------------
+// ‹¤’ÊƒvƒƒOƒ‰ƒ€‹N“®
+//------------------------------------------------------------------
+function RunWSF(cmd)
+	{
+	var cmd=basepath+"\\congworks\\RunWSF.bat "+ConfigLocal.TokenID+" \""+cmd+"\"";
+	WshShell.Run(cmd,0,true);
+	result=ReadFile("c:\\temp\\quicky\\"+ConfigLocal.TokenID+".txt");
+	return result;
+	}
+

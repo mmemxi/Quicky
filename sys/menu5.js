@@ -467,27 +467,24 @@ function MENU5E_Start_Exec(Id)
 		return;
 		}
 
-	//	ログの記入
-	stream = fso.OpenTextFile(ApartFile(Id), 8,true,-2);
-	overday=AddDays(ymd,ConfigAll.AutoEndApart);
-	s=a+","+ymd+",,"+overday;
-	stream.WriteLine(s);
-	stream.Close();
-	s="建物名称＝"+Id+"、貸出日＝"+ymd+"、終了期限＝"+overday+"、使用者＝"+a;
-
-	//	印刷開始
+	//	外部プログラムとして呼び出す
 	ClearLayer("Stage");
-	WriteLayer("Stage","印刷中です…");
-	var pdffile=AddMyMap(a,"A",num,seq,inx,counts,overday);
-	PrintApart(num,seq,Id,pdffile);
-	text=ReadFile(UserFile2());
-	if (text.indexOf(a,0)==-1)
+	WriteLayer("Stage","処理中です…");
+	cmd="rentA.wsf "+congnum+":"+a+":"+num+":"+seq+":"+Id;
+	var objResult=RunWSF(cmd);
+	if (objResult!="ok")
 		{
-		stream = fso.OpenTextFile(UserFile2(),8,true,-2);
-		stream.WriteLine(a);
-		stream.close();
+		alert("アパート貸し出し処理中にエラーが発生し、処理が失敗しました。");
 		}
-	CreateSummaryofApartment();
+
+	var pdffile=GetMyMap(num,seq,Id,a);
+	if (pdffile=="")
+		{
+		alert("貸し出し地図の印刷に失敗しました。");
+		}
+	else{
+		PrintApart(num,seq,Id,pdffile);
+		}
 	MENU5();
 	}
 
@@ -572,7 +569,6 @@ function MENU5E_End_Exec(Id)
 	s=a+","+ymd+","+d1+","+overday;
 	stream.WriteLine(s);
 	stream.close();
-	s="建物名称＝"+Id+"、貸出日＝"+ymd+"、終了日＝"+d1+"、使用者＝"+a;
 	CreateSummaryofApartment();
 	RemoveMyMap(a,"A",0,0,Id);
 	MENU5();
@@ -609,29 +605,35 @@ function MENU5E_Start_RollBack(Id)
 	CreateSummaryofApartment();
 	MENU5();
 	}
+
 function MENU5E_End_Cancel(Id)
 	{
-	var a,s;
-	var i,text,maxlogs,seq;
-	var lines=new Array();
-	var userid,tbl;
-	a=confirm("「"+Id+"」の使用中状態を取り消します。よろしいですか？");
-	if (!a) return;
-	text=ReadFile(ApartFile(Id));
-	lines=text.split(/\r\n/);
-	maxlogs=lines.length;
-	lines[maxlogs-1].trim();
-	if (lines[maxlogs-1]=="") maxlogs--;
-	var stream = fso.CreateTextFile(ApartFile(Id),true);
-	for(i=0;i<maxlogs-1;i++)
+	var cmf,userid,pdffile,ll;
+	cmf=confirm("「"+Id+"」の使用中状態を取り消します。よろしいですか？");
+	if (!cmf) return;
+
+	//	ユーザー名を取得する
+	var text=ReadFile(ApartFile(Id));
+	var s=text.split("\r\n");
+	var l=s.length;
+	ll=s[l-1];
+	if (ll=="") ll=s[l-2];
+	var tbl=ll.split(",");
+	userid=tbl[0];			//	最新使用ユーザー名
+
+	//	PDFファイル名を取得する
+	pdffile=GetMyMap("","",Id,userid);
+	pdffile=fso.GetFileName(pdffile);
+
+	//	外部プログラムとして呼び出す
+	ClearLayer("Stage");
+	WriteLayer("Stage","処理中です…");
+	cmd="cancel.wsf "+congnum+" "+userid+" "+pdffile;
+	var objResult=RunWSF(cmd);
+	if (objResult.indexOf("NO=",0)!=-1)
 		{
-		stream.WriteLine(lines[i]);
+		alert("アパート返却処理中にエラーが発生し、処理が失敗しました。");
 		}
-	stream.close();
-	tbl=lines[maxlogs-1].split(",");
-	s="建物名称＝"+Id;
-	CreateSummaryofApartment();
-	RemoveMyMap(tbl[0],"A",0,0,Id);
 	MENU5();
 	}
 function MakeLogs2(Id)
