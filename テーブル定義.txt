@@ -1,0 +1,25 @@
+//------------------------------------------------------------------
+テーブル：
+	ReportLogs
+定義：
+	create table ReportLogs (congnum integer,execdate integer,range_start integer,range_end integer);
+項目：
+	congnum		会衆番号（数値）
+	execdate	実行日（数値８桁）
+	range_start	開始日（数値８桁）
+	range_end	終了日（数値８桁）
+作成：
+	setup.jsのCreateReportLogs()
+//------------------------------------------------------------------
+テーブル：
+	CWUsers
+定義：
+	create table CWUsers(congnum integer,userid text,authority text) primary key(congnum,authority,userid);
+項目：
+	congnum		会衆番号（数値）
+	userid		ユーザー名（文字）
+	authority	種類（文字）publicservice＝会衆の区域、personalservice＝個人の区域
+作成：
+	setup.jsのCreateUsers()
+//------------------------------------------------------------------
+	

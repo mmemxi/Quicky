@@ -66,6 +66,14 @@
 ④個人区域キャンセル(cancel.wsf)
 ⑤アパート区域貸し出し(rentA.wsf)
 ⑥アパート区域キャンセル(cancel.wsf)
+・ユーザー名(users.txt,users2.txt)をデータベース化する
+  rent.wsf		貸し出し時、ユーザー名をテーブルに更新する
+  verify.wsf	users.txtからユーザー一覧を取得するのではなく、テーブルから取得するように変更
+  setup.js		CreateUsersを実行することでセットアップ（すでに作成済）
+  menu1.js		UserPad(),UserPad2()を変更、DeleteUPad1,DeleteUPad2を変更
+  file.js		UserFile(),UserFile2()を廃止する
+  rentA.wsf		個人ユーザー名をCWUsersに登録する
+  rentB.wsf		個人ユーザー名をCWUsersに登録する
 
 ※モジュールの共通仕様：
 ・congworksフォルダ下で完結する。他のフォルダにあるファイルを使用しない。

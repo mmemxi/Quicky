@@ -2,7 +2,7 @@
 function SQliteSetup()
 	{
 //	CreateReportLogs();
-//	CreateUsers();
+	CreateUsers();
 //	CreateConfig();
 //	LogSetUp();
 	}
@@ -46,7 +46,45 @@ function CreateReportLogs()
 		}
 	SQ_Insert("ReportLogs",obj);
 	}
+//-----------------------------------------------------------------------------
+//	CreateUsers
+//-----------------------------------------------------------------------------
+function CreateUsers()
+	{
+	SQ_Exec("drop table CWUsers;");
+	SQ_Exec("create table CWUsers(congnum integer,userid text,authority text,primary key(congnum,authority,userid));");
+	var f=ReadFile(DataFolder()+"users.txt");
+	var tbl1=f.split("\r\n");
+	f=ReadFile(DataFolder()+"users2.txt");
+	var tbl2=f.split("\r\n");
+	var out=new Array();
+	var obj;
 
+	//	会衆用ユーザー一覧
+	for(i=0;i<tbl1.length;i++)
+		{
+		s=tbl1[i];
+		if (s=="") continue;
+		obj=new Object();
+		obj.congnum=congnum;
+		obj.userid=s;
+		obj.authority="publicservice";
+		out.push(obj);
+		}
+
+	//	個人用ユーザー一覧
+	for(i=0;i<tbl2.length;i++)
+		{
+		s=tbl2[i];
+		if (s=="") continue;
+		obj=new Object();
+		obj.congnum=congnum;
+		obj.userid=s;
+		obj.authority="personalservice";
+		out.push(obj);
+		}
+	SQ_Insert("CWUsers",out);
+	}
 //-----------------------------------------------------------------------------
 // CreateConfig
 //-----------------------------------------------------------------------------
@@ -64,62 +102,6 @@ function CreateConfig()
 	cfg.RemotePassword="jw34173";
 	cfg.RemoteDirectory="/public_html";
 	InsertSQlite("CWConfig",cfg);
-	}
-//-----------------------------------------------------------------------------
-//	CreateUsers
-//-----------------------------------------------------------------------------
-function CreateUsers()
-	{
-	ExecSQlite("DELETE FROM CWUsers;");
-	var f=ReadFile(SysFolder()+"users.txt");
-	var tbl1=f.split("\r\n");
-	f=ReadFile(SysFolder()+"users2.txt");
-	var tbl2=f.split("\r\n");
-	var out1=new Array();
-	var out2=new Array();
-	for(i=0;i<tbl1.length;i++)
-		{
-		s=tbl1[i];
-		if (s=="") continue;
-		if (!(s in out1))
-			{
-			out1[s]=new Object();
-			out1[s].congnum=congnum;
-			out1[s].userid=s;
-			out1[s].authority="publicservice";
-			}
-		else{
-			if (out1[s].authority.indexOf("publicservice",0)==-1)
-				{
-				if (out1[s].authority!="") out1[s].authority+=";";
-				ou1t[s].authority+="publicservice";
-				}
-			}
-		}
-	for(i=0;i<tbl2.length;i++)
-		{
-		s=tbl2[i];
-		if (s=="") continue;
-		if (!(s in out1))
-			{
-			out1[s]=new Object();
-			out1[s].congnum=congnum;
-			out1[s].userid=s;
-			out1[s].authority="personalservice";
-			}
-		else{
-			if (out1[s].authority.indexOf("personalservice",0)==-1)
-				{
-				if (out1[s].authority!="") out1[s].authority+=";";
-				out1[s].authority+="personalservice";
-				}
-			}
-		}
-	for(s in out1)
-		{
-		out2.push(out1[s]);
-		}
-	InsertSQlite("CWUsers",out2);
 	}
 //-----------------------------------------------------------------------------
 // LogSetUp()

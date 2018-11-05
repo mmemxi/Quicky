@@ -6,6 +6,7 @@
 <script language="JavaScript" src="./lib/marker.js"></script>
 <script language="JavaScript" src="./lib/summary.js"></script>
 <script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript" src="../sqlite/sqlite.js"></script>
 <script language="JavaScript">
 //----------------------------------------------------------------
 // rentA.wsf 集中インターホンの区域を貸し出す
@@ -70,6 +71,16 @@ var targetstr=WScript.Arguments(0);
 	//	地図データの作成
 	var cmd="cscript.exe \""+WSHScript("mapgen.wsf")+"\" "+congnum+" "+num+" "+seq+" \""+Id+"\" \""+pdffile+"\"";
 	WshShell.Run(cmd,0,true);
+
+	//	ユーザー名を登録
+	SQ_Init("congworks.db");
+	var uobj=new Object();
+	uobj.congnum=congnum;
+	uobj.userid=user;
+	uobj.authority="personalservice";
+	SQ_Replace("CWUsers",uobj);
+
+	//	終了
 	WScript.StdOut.Write("ok");
 	WScript.quit();
 

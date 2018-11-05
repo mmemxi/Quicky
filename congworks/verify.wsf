@@ -3,6 +3,7 @@
 <script language="JavaScript" src="./lib/common.js"></script>
 <script language="JavaScript" src="./lib/xml.js"></script>
 <script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript" src="../sqlite/sqlite.js"></script>
 <script language="JavaScript">
 //----------------------------------------------------------------
 // verify.wsf 会衆用新規区域の貸出前確認
@@ -13,6 +14,7 @@ var congnum=WScript.Arguments(0);
 var num=WScript.Arguments(1);
 var str;
 var ConfigAll=ReadXMLFile(IniXML(congnum,"all"),false);
+SQ_Init("congworks.db");
 //(1)１行目：区域名----------------------------------------------------------------
 var dfile=ConfigXML(congnum,num);
 var cobj;
@@ -48,9 +50,14 @@ else{
 	WScript.StdOut.Write("00000000-00000000\n");
 	}
 //(4)４行目以降：ユーザー一覧----------------------------------------------------------
-var users=ReadFile(DataFolder(congnum)+"users.txt");
-users=users.replace("/\r\n/","\n");
-WScript.StdOut.Write(users);
+var users=SQ_Read("CWUsers","congnum="+congnum+" and authority='publicservice'","userid");
+var txt="";
+for(i=0;i<users.length;i++)
+	{
+	if (i>0) txt+="\n";
+	txt+=users[i].userid;
+	}
+WScript.StdOut.Write(txt);
 WScript.quit();
 </script>
 </job>

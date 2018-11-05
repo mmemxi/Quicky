@@ -1531,22 +1531,18 @@ function UserPad()
 	{
 	var s,i;
 	var usrs=new Array();
-	for(i in UPAD) delete UPAD[i];
+	UPAD=new Array();
 	s="<div style='position:absolute;top:60px;left:620px;z-index:2;'>";
 	s+="<table border=1 cellpadding=4 cellspacing=0 bgcolor='#99ffff' width=200>";
 	s+="<tr><td><font color=blue><b>使用者名履歴：</b></font><br>";
-	var text=ReadFile(UserFile());
-	if (text!="")
+	var usrs=SQ_Read("CWUsers","congnum="+congnum+" and authority='publicservice'","userid");
+	if (usrs.length>0)
 		{
-		usrs=text.split(/\r\n/);
-		usrs.sort(UserPad_Sort);
 		s+="<form id='UP1'><select id='UPS1' size=22 style='width:200px;' onchange='i=this.selectedIndex;AutoUser(i);'>";
-		for(i=0;i<usrs.length;i++)	{if (usrs[i]==""){usrs.splice(i,1);i--;}}
-
 		for(i=0;i<usrs.length;i++)
 			{
-			UPAD[i]=usrs[i];
-			s+="<option>"+usrs[i]+"</option>";
+			UPAD[i]=usrs[i].userid;
+			s+="<option>"+usrs[i].userid+"</option>";
 			}
 		s+="</select><br>";
 		s+="<input type=button value='削除' onclick='DeleteUPad1()'></form>";
@@ -1558,13 +1554,6 @@ function UserPad()
 	return s;
 	}
 
-function UserPad_Sort(a,b)
-	{
-	if (a<b) return -1;
-	if (a>b) return 1;
-	return 0;
-	}
-
 function UserPad2()
 	{
 	var s,i;
@@ -1573,18 +1562,14 @@ function UserPad2()
 	s="<div style='position:absolute;top:60px;left:620px;z-index:2;'>";
 	s+="<table border=1 cellpadding=4 cellspacing=0 bgcolor='#99ffff' width=200>";
 	s+="<tr><td><font color=blue><b>使用者名履歴：</b></font><br>";
-	var text=ReadFile(UserFile2());
-	if (text!="")
+	var usrs=SQ_Read("CWUsers","congnum="+congnum+" and authority='personalservice'","userid");
+	if (usrs.length>0)
 		{
-		usrs=text.split(/\r\n/);
-		usrs.sort(UserPad_Sort);
 		s+="<form id='UP2'><select id='UPS2' size=22 style='width:200px;' onchange='i=this.selectedIndex;AutoUser2(i);'>";
-		for(i=0;i<usrs.length;i++)	{if (usrs[i]==""){usrs.splice(i,1);i--;}}
 		for(i=0;i<usrs.length;i++)
 			{
-			if (usrs[i]=="") break;
-			UPAD2[i]=usrs[i];
-			s+="<option>"+usrs[i]+"</option>";
+			UPAD2[i]=usrs[i].userid;
+			s+="<option>"+usrs[i].userid+"</option>";
 			}
 		s+="</select><br>";
 		s+="<input type=button value='削除' onclick='DeleteUPad2()'></form>";
@@ -1598,34 +1583,20 @@ function UserPad2()
 
 function DeleteUPad1()
 	{
-	var j;
 	var u=document.forms["UP1"].UPS1;
 	var i=u.selectedIndex;
+	SQ_Delete("CWUsers","congnum="+congnum+" and authority='publicservice' and userid='"+UPAD[i]+"';");
 	UPAD.splice(i,1);
-	var fc=fso.CreateTextFile(UserFile(),true);
-	for(j=0;j<UPAD.length;j++)
-		{
-		u.options[j].text=UPAD[j];
-		fc.WriteLine(UPAD[j]);
-		}
 	u.length=UPAD.length;
-	fc.close();
 	}
 
 function DeleteUPad2()
 	{
-	var j;
 	var u=document.forms["UP2"].UPS2;
 	var i=u.selectedIndex;
+	SQ_Delete("CWUsers","congnum="+congnum+" and authority='personalservice' and userid='"+UPAD2[i]+"';");
 	UPAD2.splice(i,1);
-	var fc=fso.CreateTextFile(UserFile2(),true);
-	for(j=0;j<UPAD2.length;j++)
-		{
-		u.options[j].text=UPAD2[j];
-		fc.WriteLine(UPAD2[j]);
-		}
 	u.length=UPAD2.length;
-	fc.close();
 	}
 
 function AutoUser(num)

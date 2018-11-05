@@ -7,6 +7,7 @@
 <script language="JavaScript" src="./lib/log.js"></script>
 <script language="JavaScript" src="./lib/saveconfig.js"></script>
 <script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript" src="../sqlite/sqlite.js"></script>
 <script language="JavaScript">
 //----------------------------------------------------------------
 // rent.wsf 会衆用区域を貸し出す
@@ -21,6 +22,7 @@ var startday=WScript.Arguments(2);
 var user=WScript.Arguments(3);
 var overday;
 var ConfigAll=ReadXMLFile(IniXML(congnum,"all"),false);
+SQ_Init("congworks.db");
 //----------------------------------------------------------------
 var Cards=new Array();
 var text,stream,Markers;
@@ -53,13 +55,12 @@ AddLog(logobj,congnum,num,user,startday,overday);	//	ログ追加
 SaveLog(logobj,congnum,num);						//	ログ書込
 //----------------------------------------------------------------
 //	使用者名マスターに追加
-text=ReadFile(DataFolder(congnum)+"users.txt");
-if (text.indexOf(user,0)==-1)
-	{
-	stream = fso.OpenTextFile(DataFolder(congnum)+"users.txt",8,true,-2);
-	stream.WriteLine(user);
-	stream.close();
-	}
+//----------------------------------------------------------------
+var uobj=new Object();
+uobj.congnum=congnum;
+uobj.userid=user;
+uobj.authority="publicservice";
+SQ_Replace("CWUsers",uobj);
 //----------------------------------------------------------------
 //	マーカーの送り処理
 PushMarkerHistory(congnum,num);		//	20170514追加

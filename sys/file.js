@@ -105,14 +105,6 @@ function LogXML(num)
 	{
 	return NumFolder(num)+"log.xml";
 	}
-function UserFile()
-	{
-	return DataFolder()+"users.txt";
-	}
-function UserFile2()
-	{
-	return DataFolder()+"users2.txt";
-	}
 function ApartFile(name)
 	{
 	var s;
