@@ -11,12 +11,18 @@ if (isset($_COOKIE['CWToken']))	$CWToken=$_COOKIE["CWToken"];
 	else $CWToken="unknown";
 $mapuser=mb_convert_encoding($mapuser,"SJIS-WIN","UTF8");
 
-//	引数＝区域番号、開始日、使用者名
+// -----------------------------------------------------
+//	(1)区域を取得する
+// -----------------------------------------------------
 $cwpath=file_get_contents('../quicky.txt', true) . "\\congworks\\";
 exec("cscript \"" . $cwpath . "rent.wsf\" $congnum $num $startday $mapuser //Nologo",$out);
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
+// -----------------------------------------------------
+//	(2)取得成功したら、区域を印刷する
+// -----------------------------------------------------
 if ($body == "ok")
 	{
+	exec("cscript \"" . $cwpath . "printpublic.wsf\" $congnum $num //Nologo",$out);
 	header("Location:newlist.php");
 	exit();
 	}

@@ -2,7 +2,7 @@
 function SQliteSetup()
 	{
 //	CreateReportLogs();
-	CreateUsers();
+//	CreateUsers();
 //	CreateConfig();
 //	LogSetUp();
 	}

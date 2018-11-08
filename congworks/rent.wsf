@@ -16,10 +16,10 @@
 // 引数３＝開始日
 // 引数４＝使用ユーザー名
 //----------------------------------------------------------------
-var congnum=WScript.Arguments(0);
-var num=WScript.Arguments(1);
-var startday=WScript.Arguments(2);
-var user=WScript.Arguments(3);
+var congnum=WScript.Arguments(0);		//	会衆番号
+var num=WScript.Arguments(1);			//	区域番号
+var startday=WScript.Arguments(2);		//	開始日
+var user=WScript.Arguments(3);			//	ユーザー名
 var overday;
 var ConfigAll=ReadXMLFile(IniXML(congnum,"all"),false);
 SQ_Init("congworks.db");
@@ -89,18 +89,10 @@ for(i=0;i<BTB.length;i++)
 if (j>0) SaveConfig(congnum,num);
 //----------------------------------------------------------------
 // 個人用留守宅情報の更新
+//----------------------------------------------------------------
 CreateSummaryofPerson(congnum,num,true);
 //----------------------------------------------------------------
-//	地図データの作成
-//	※pdffile=作成ファイル名
-var now=new Date();
-var pdffile="que"+(now.getMinutes()*100000+now.getSeconds()*1000+now.getMilliseconds())+".pdf";
-var path1="c:"+qt+"temp"+qt+"quicky"+qt;
-var path2="c:"+qt+"temp"+qt+"quicky"+qt+"pdfque"+qt;
-var cmd="cscript.exe \""+WSHScript("mapgen.wsf")+"\" "+congnum+" "+num+" 0 public \""+path1+pdffile+"\"";
-WshShell.Run(cmd,0,true);
-fso.CopyFile(path1+pdffile,path2+pdffile,true);
-fso.DeleteFile(path1+pdffile,true);
+// 正常終了
 //----------------------------------------------------------------
 WScript.StdOut.Write("ok");
 WScript.quit();

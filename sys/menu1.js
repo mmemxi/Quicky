@@ -1015,7 +1015,7 @@ function MENU1E_Start_Exec(num)
 	var stream,text,s;
 	var overday;
 	var LimitStartDay=GetAvailableDate(num);	//	この日以降が使用可能である日付を取得
-	var cmd;
+	var cmd,cmf,cmp;
 
 	a=document.forms[0].elements[0].value;	//　使用者
 	b=document.forms[0].elements[1].value;	//	貸出日
@@ -1042,14 +1042,25 @@ function MENU1E_Start_Exec(num)
 		return;
 		}
 
-	//	外部プログラムとして呼び出す
+	//	貸し出し処理（外部プログラム）
 	ClearLayer("Stage");
 	WriteLayer("Stage","処理中です…");
-	cmd="rent.wsf "+congnum+" "+num+" "+ymd+" "+a;
+	cmd="rent.wsf "+congnum+" "+num+" "+ymd+" "+a+" "+cmp;
 	var objResult=RunWSF(cmd);
 	if (objResult!="ok")
 		{
 		alert("貸し出し処理中にエラーが発生し、貸出処理が失敗しました。");
+		LoadCard(num);
+		MENU1EExit();
+		return;
+		}
+
+	//	印刷する？
+	cmf=confirm("№"+num+"「"+Cards[num].name+"」の地図をすべて印刷しますか？");
+	if (cmf)
+		{
+		cmd="printpublic.wsf "+congnum+" "+num;
+		objResult=RunWSF(cmd);
 		}
 	LoadCard(num);
 	MENU1EExit();
@@ -1583,20 +1594,20 @@ function UserPad2()
 
 function DeleteUPad1()
 	{
-	var u=document.forms["UP1"].UPS1;
-	var i=u.selectedIndex;
+	var select=document.forms["UP1"].UPS1;
+	var i=select.selectedIndex;
 	SQ_Delete("CWUsers","congnum="+congnum+" and authority='publicservice' and userid='"+UPAD[i]+"';");
 	UPAD.splice(i,1);
-	u.length=UPAD.length;
+	select.removeChild(select.options[i]);
 	}
 
 function DeleteUPad2()
 	{
-	var u=document.forms["UP2"].UPS2;
-	var i=u.selectedIndex;
+	var select=document.forms["UP2"].UPS2;
+	var i=select.selectedIndex;
 	SQ_Delete("CWUsers","congnum="+congnum+" and authority='personalservice' and userid='"+UPAD2[i]+"';");
 	UPAD2.splice(i,1);
-	u.length=UPAD2.length;
+	select.removeChild(select.options[i]);
 	}
 
 function AutoUser(num)

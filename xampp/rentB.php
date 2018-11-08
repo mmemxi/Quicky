@@ -5,12 +5,10 @@ $congnum=$_COOKIE["CWPerson_congnum"];
 $congname=$_COOKIE["CWPerson_congname"];
 $num=$_COOKIE["CWPerson_num"];
 $seq=$_COOKIE["CWPerson_seq"];
-$name=$_COOKIE["CWPerson_name"];
-$names=mb_convert_encoding($name,"SJIS-WIN","UTF8");
 $CWToken=$_COOKIE["CWToken"];
 $cwpath=file_get_contents('quicky.txt', true) . "\\congworks\\";
-$target=$congnum . ":" . $UIDS . ":" . $num . ":" . $seq . ":" . $names;
-//	会衆番号、ユーザー名、区域番号、地図番号、物件名
+$target=$congnum . ":" . $UIDS . ":" . $num . ":" . $seq;
+//	会衆番号、ユーザー名、区域番号、地図番号
 exec("cscript \"" . $cwpath . "rentB.wsf\" $target //Nologo",$out);
 $body=mb_convert_encoding($out[0],"UTF8","SJIS-WIN");
 if ($body == "No System")

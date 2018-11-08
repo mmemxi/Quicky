@@ -77,5 +77,6 @@ var targetstr=WScript.Arguments(0);
 	WScript.StdOut.Write("ok");
 	WScript.quit();
 
+
 </script>
 </job>
