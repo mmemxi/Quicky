@@ -54,6 +54,12 @@ if (logobj.Status=="Using")				//	他の人が使用開始していた
 AddLog(logobj,congnum,num,user,startday,overday);	//	ログ追加
 SaveLog(logobj,congnum,num);						//	ログ書込
 //----------------------------------------------------------------
+// 区域テーブル更新
+//----------------------------------------------------------------
+sql="update PublicList set inuse='true',userid='"+user+"',startday="+startday+",endday=0,limitday="+overday;
+sql+=" where congnum="+congnum+" and num="+num+";";
+SQ_Exec(sql);
+//----------------------------------------------------------------
 //	使用者名マスターに追加
 //----------------------------------------------------------------
 var uobj=new Object();
@@ -152,5 +158,20 @@ function LoadCard(congnum,num)
 		Cards[num].Comments=new Array();
 		}
 	}
+
+function Log(message)
+	{
+	var t=new Date();
+	if (!(fso.FileExists("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt")))
+		{
+		f=fso.CreateTextFile("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt",true);
+		}
+	else{
+		f=fso.OpenTextFile("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt",8,true);
+		}
+	f.WriteLine(t+":"+message);
+	f.close();
+	}
+
 </script>
 </job>

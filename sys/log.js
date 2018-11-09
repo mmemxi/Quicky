@@ -18,6 +18,15 @@ function LoadLog(num)
 function SaveLog(obj,num)
 	{
 	WriteXMLFile(obj,LogXML(num));
+	var sql="update PublicList set ";
+	if (obj.Status=="Free")	sql+=" inuse='false',";
+					else	sql+=" inuse='true',";
+	sql+="userid='"+obj.Latest.User+"',";
+	sql+="startday="+obj.Latest.Rent+",";
+	sql+="endday="+obj.Latest.End+",";
+	sql+="limitday="+obj.Latest.Limit;
+	sql+=" where congnum="+congnum+" and num="+num+";";
+	SQ_Exec(sql);
 	}
 
 //------------------------------------------------------------------

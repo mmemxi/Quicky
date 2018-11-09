@@ -7,6 +7,7 @@
 <script language="JavaScript" src="./lib/log.js"></script>
 <script language="JavaScript" src="./lib/saveconfig.js"></script>
 <script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript" src="../sqlite/sqlite.js"></script>
 <script language="JavaScript">
 //----------------------------------------------------------------
 // cancelpp.wsf 会衆用区域の貸出をキャンセルする
@@ -38,6 +39,17 @@ if (l==0)
 obj.History.splice(l-1,1);
 SetLogSummary(obj);
 SaveLog(obj,congnum,num);
+//----------------------------------------------------------------
+// 区域テーブル更新
+//----------------------------------------------------------------
+var old_userid=obj.Latest.User;
+var old_startday=obj.Latest.Rent;
+var old_limitday=obj.Latest.Limit;
+var old_endday=obj.Latest.End;
+sql="update PublicList set inuse='false',userid='"+old_userid+"',startday="+old_startday+",endday="+old_endday+",limitday="+old_limitday;
+sql+=" where congnum="+congnum+" and num="+num+";";
+SQ_Init("congworks.db");
+SQ_Exec(sql);
 // マーカーの戻し------------------------------------------------------------
 s=PopMarkerHistory(congnum,num);		//	20170514追加
 Markers=LoadMarker(congnum,num);
@@ -124,5 +136,20 @@ function LoadCard(congnum,num)
 		Cards[num].Comments=new Array();
 		}
 	}
+
+function Log(message)
+	{
+	var t=new Date();
+	if (!(fso.FileExists("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt")))
+		{
+		f=fso.CreateTextFile("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt",true);
+		}
+	else{
+		f=fso.OpenTextFile("c:"+qt+"tool"+qt+"quicky"+qt+"log.txt",8,true);
+		}
+	f.WriteLine(t+":"+message);
+	f.close();
+	}
+
 </script>
 </job>

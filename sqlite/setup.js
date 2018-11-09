@@ -1,10 +1,77 @@
 //-----------------------------------------------------------------------------
 function SQliteSetup()
 	{
+//	CreatePublicList();
 //	CreateReportLogs();
 //	CreateUsers();
 //	CreateConfig();
 //	LogSetUp();
+	}
+//-----------------------------------------------------------------------------
+function CreatePublicList()
+	{
+	var obj;
+	var carray=new Array();
+
+	//	以前の定義を削除する
+	SQ_Exec("delete from PublicList where congnum="+congnum+";");
+
+	//	全区域をループする
+	dir=fso.GetFolder(DataFolder());
+	folders=new Enumerator(dir.SubFolders);
+	for(; !folders.atEnd(); folders.moveNext())
+		{
+		fitem=folders.item();
+		if (isNaN(fitem.Name)) continue;
+		num=fso.GetBaseName(fitem.Name);
+		obj=CreatePublicList_One(num);
+		carray.push(obj);
+		}
+	SQ_Insert("PublicList",carray);
+	}
+//-----------------------------------------------------------------------------
+function CreatePublicList_One(num)
+	{
+	var card=new Object();
+	var cobj=ReadXMLFile(ConfigXML(num),false);
+	card.congnum=congnum;					//	会衆番号
+	card.num=num;							//	区域番号
+	card.name=cobj.name;					//	区域名
+	card.kubun=cobj.kubun;					//	区域区分
+	card.maps=cobj.count;					//	地図枚数
+	if ("RTB" in cobj)	card.refuses=cobj.RTB.length;	//	特記軒数
+				else	card.refuses=0;
+	card.buildings=cobj.Buildings.Count;	//	物件数
+	card.persons=cobj.Buildings.House;		//	世帯数
+	card.inuse=false;						//	使用中
+	card.userid="unknown";					//	使用者
+	card.startday=0;						//	使用開始日
+	card.endday=0;							//	使用終了日
+	card.limitday=0;						//	終了期限日
+
+	var log=ReadXMLFile(NumFolder(num)+"log.xml",false);
+	if (log!="")
+		{
+		if ("Status" in log)
+			{
+			card.userid=log.Latest.User;
+			card.startday=log.Latest.Rent;
+			card.limitday=log.Latest.Limit;
+			if (log.Status=="Using")
+				{
+				card.inuse=true;
+				card.endday=0;
+				}
+			else{
+				card.inuse=false;
+				card.endday=log.Latest.End;
+				}
+			}
+		}
+	else{
+		card.endday="20000101";
+		}
+	return card;
 	}
 //-----------------------------------------------------------------------------
 function SQGetDate(str)

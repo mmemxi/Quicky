@@ -3,6 +3,7 @@
 <script language="JavaScript" src="./lib/common.js"></script>
 <script language="JavaScript" src="./lib/xml.js"></script>
 <script language="JavaScript" src="./lib/campeign.js"></script>
+<script language="JavaScript" src="../sqlite/sqlite.js"></script>
 <script language="JavaScript">
 //----------------------------------------------------------------
 // newlist.wsf 会衆用新規区域の貸出候補を表示する
@@ -14,63 +15,30 @@ var user=WScript.Arguments(1);		//	ユーザー名
 //----------------------------------------------------------------
 var ConfigAll=ReadXMLFile(IniXML(congnum,"all"),false);
 //----------------------------------------------------------------
-var f,s,i,j,k,num,card,cobj;
-var dir,folders,fitem,obj,nisu;
-var log;
+//	区域リストの読み取り(SQlite)
+//----------------------------------------------------------------
+SQ_Init("congworks.db");
+var sqlist=SQ_Read("PublicList","congnum="+congnum,"num");
+//----------------------------------------------------------------
+var i,card,num,nisu;
 var now=new Date();
 var today=now.getFullYear()*10000+(now.getMonth()+1)*100+now.getDate();
 //----------------------------------------------------------------
 //	区域フォルダの走査
 //----------------------------------------------------------------
-dir=fso.GetFolder(DataFolder(congnum));
-folders=new Enumerator(dir.SubFolders);
-for(; !folders.atEnd(); folders.moveNext())
+for(i=0;i<sqlist.length;i++)
 	{
-	fitem=folders.item();
-	if (isNaN(fitem.Name)) continue;
-	num=fso.GetBaseName(fitem.Name);
-
-	//	対象の区域の詳細読込
-	card=new Object();
-	cobj=ReadXMLFile(ConfigXML(congnum,num),false);
-	card.name=cobj.name;	//	区域名
-	card.kubun=cobj.kubun;	//	区域区分
-	card.lastuser="*";		//	最終使用者（ログから取得）
-	card.NowUsing=false;
-	card.lastuse="00000000";
-
-	//	対象の区域のログ読込
-	log=ReadXMLFile(NumFolder(congnum,num)+"log.xml",false);
-	if (log!="")
-		{
-		if ("Status" in log)
-			{
-			if (log.Status=="Using")
-				{
-				card.NowUsing=true;
-				card.Limit=log.Latest.Limit;
-				card.lastuse=log.Latest.Rent;
-				card.lastuser=log.Latest.User;
-				}
-			else{
-				card.NowUsing=false;
-				card.lastuse=log.Latest.End;
-				}
-			}
-		}
-	else{
-		card.NowUsing=false;
-		card.lastuse="20000101";
-		card.lastuser="";
-		}
+	card=sqlist[i];
+	num=card.num;
 
 	//	現在使用中、かつ自分でなければスキップ
-	if ((card.NowUsing)&&(card.lastuser!=user)) continue;
+	if ((card.inuse=="true")&&(card.userid!=user)) continue;
 
 	//	日数十分か確認
-	if (!card.NowUsing)
+	if (card.inuse=="false")
 		{
-		nisu=CalcDays(card.lastuse,"");
+		card.userid="*";
+		nisu=CalcDays(card.endday,"");
 		if (isCampeign(today))		//	キャンペーン期間中
 			{
 			if (nisu<ConfigAll.BlankCampeign) continue;
@@ -87,12 +55,12 @@ for(; !folders.atEnd(); folders.moveNext())
 		}
 
 	//	ＯＫ、リストに追加
-	if (card.lastuser=="*")
+	if (card.userid=="*")
 		{
-		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+nisu+"日前,"+card.lastuser+"\n");
+		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+nisu+"日前,*\n");
 		}
 	else{
-		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+SplitDate(card.lastuse)+"～,"+card.lastuser+"\n");
+		WScript.StdOut.Write(num+","+card.name+","+card.kubun+","+SplitDate(card.startday)+"～,"+user+"\n");
 		}
 	}
 WScript.quit();

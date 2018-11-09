@@ -41,49 +41,65 @@ function MENU1()
 	kubuncount=1;
 	Menu1_Filter_kubuncount=0;
 	
-	for(num in Cards)
+	//	SQliteテーブルの読込--------------------------------------------------------------
+	var cwhere="congnum="+congnum;
+	var corder="num";
+	var clast;
+	var cobj;
+	if (Menu1_Filter_status=="使用可能")	cwhere+=" and inuse='false'";
+	if (Menu1_Filter_status=="未使用")		cwhere+=" and inuse='false'";
+	if (Menu1_Filter_status=="使用中")		cwhere+=" and inuse='true'";
+	if (Menu1_Filter_kubun!="")				cwhere+=" and kubun='"+Menu1_Filter_kubun+"'";
+	var ctbl=SQ_Read("PublicList",cwhere,"");
+
+	//	使用状況を配列オブジェクトに追加する---------------------------------------------
+	for(i=0;i<ctbl.length;i++)
 		{
-		kubun=Cards[num].kubun;
+		cobj=ctbl[i];
+		num=cobj.num;
+		kubun=cobj.kubun;
 		if (!(kubun in kbn))
 			{
 			Menu1_Filter_kubuncount++;
 			kbn[kubun]=Menu1_Filter_kubuncount;
 			}
-		//	フィルターによる表示制御-----------------------------------------------------------------
-		Cards[num].visible=true;
-		if (Menu1_Filter_status!="")
+
+		if (cobj.inuse=="true")
 			{
-			if (Menu1_Filter_status=="使用可能")
+			cobj.Lastuse=cobj.startday;
+			cobj.Blank=CalcDays(cobj.startday,"");					//	使用日数
+			cobj.Avail="false";										//	使用可能＝Ｎｏ
+			cobj.Status="使用中("+cobj.userid+"："+cobj.startday.substring(4,6)+"/"+cobj.startday.substring(6,8)+"～）";
+			}
+		else{
+			cobj.Lastuse=cobj.endday;
+			cobj.Blank=CalcDays(cobj.endday,"");					//	使用日数
+			if (isCampeign(today))			//	キャンペーン中
 				{
-				if (Cards[num].NowUsing) Cards[num].visible=false;
-				else{
-					if (isCampeign(today))		//	キャンペーン期間中
-						{
-						if (Cards[num].Blank<ConfigAll.BlankCampeign) Cards[num].visible=false;
-						}
-					else{
-						if (isAfterCampeign(today))	//	キャンペーン後30日
-							{
-							if((Cards[num].Blank<ConfigAll.BlankAfterCampeign)&&(Cards[num].Blank!=-1)) Cards[num].visible=false;
-							}
-						else{						//	通常期間
-							if((Cards[num].Blank<ConfigAll.BlankMin)&&(Cards[num].Blank!=-1)) Cards[num].visible=false;
-							}
-						}
+				if (cobj.Blank<ConfigAll.BlankCampeign) cobj.Avail="disable";else cobj.Avail="true";
+				}
+			else{
+				if (isAfterCampeign(today))	//	ｷｬﾝﾍﾟｰﾝ期間後30日
+					{
+					if (cobj.Blank<ConfigAll.BlankAfterCampeign) cobj.Avail="disable";else cobj.Avail="true";
+					}
+				else{						//	通常の期間
+					if ((cobj.Blank<ConfigAll.BlankMin)&&(cobj.Blank!=-1)) cobj.Avail="disable";else cobj.Avail="true";
 					}
 				}
-			if (Menu1_Filter_status=="未使用")
+			cobj.Status="未使用("+cobj.Blank+"日前)";
+			if (isBeforeCampeign(today))
 				{
-				if (Cards[num].NowUsing) Cards[num].visible=false;
-				}
-			if (Menu1_Filter_status=="使用中")
-				{
-				if (!Cards[num].NowUsing) Cards[num].visible=false;
+				cobj.Status="ｷｬﾝﾍﾟｰﾝ準備期間("+cobj.Blank+"日前)";
+				cobj.Avail="false";
 				}
 			}
-		if ((Menu1_Filter_kubun!="")&&(Cards[num].kubun!=Menu1_Filter_kubun)) 
+
+		//	フィルターによる表示制御
+		if ((Menu1_Filter_status=="使用可能")&&(cobj.Avail!="true"))
 			{
-			Cards[num].visible=false;
+			ctbl.splice(i,1);
+			i--;
 			}
 		}
 	//	ソートキー-----------------------------------------------------------------
@@ -136,25 +152,21 @@ function MENU1()
 	maxsort=0;
 	SumMaps=0;SumRefuses=0;SumUsing=0;SumFree=0;SumTotal=0;SumBuildings=0;SumHouses=0;
 	for(i in Sortkey) delete Sortkey[i];
-	for(i in Cards)
+	for(i in ctbl)
 		{
-		if (!(i in Cards)) continue;
-		if ((Menu1_Filter_kubun!="")&&(Cards[i].kubun!=Menu1_Filter_kubun)) 
-			{
-			continue;
-			}
-		if (!Cards[i].visible) continue;
-		if (Cards[i].status.indexOf("使用中",0)!=-1) SumUsing++;
-		if (Cards[i].status.indexOf("未使用",0)==0) SumFree++;
-		SumBuildings+=Cards[i].Buildings.Count;
-		SumHouses+=Cards[i].Buildings.House;
+		num=ctbl[i].num;
+		if (ctbl[i].Status.indexOf("使用中",0)!=-1) SumUsing++;
+		if (ctbl[i].Status.indexOf("未使用",0)==0) SumFree++;
+		SumBuildings+=parseInt(ctbl[i].buildings,10);
+		SumHouses+=parseInt(ctbl[i].persons,10);
 		SumTotal++;
-		SumMaps+=parseInt(Cards[i].count,10);
-		SumRefuses+=parseInt(Cards[i].refuses);
+		SumMaps+=parseInt(ctbl[i].maps,10);
+		SumRefuses+=parseInt(ctbl[i].refuses,10);
 		Sortkey[maxsort]=new Object();
-		Sortkey[maxsort].num=i;
-		Sortkey[maxsort].lastuse=Cards[i].lastuse;
-		Sortkey[maxsort].kubun=Cards[i].kubun;
+		Sortkey[maxsort].num=num;
+		Sortkey[maxsort].i=i;
+		Sortkey[maxsort].lastuse=ctbl[i].Lastuse;
+		Sortkey[maxsort].kubun=ctbl[i].kubun;
 		maxsort++;
 		}
 	Sortkey.sort(cmp_sort);
@@ -167,45 +179,41 @@ function MENU1()
 	s+="　</td></tr>";
 	for(j=0;j<maxsort;j++)
 		{
-		i=Sortkey[j].num;
+		i=Sortkey[j].i;
+		num=ctbl[i].num;
 		s+="<tr>";
-		s+="<td style='cursor:pointer' title='詳細情報を修正します' onClick='MENU1B("+i+")' align=right>"+i+"</td>";				//	区域番号
-		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+i+")'>"+Cards[i].name+"</td>";							//	区域名
-		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+i+")'>"+Cards[i].kubun+"</td>";						//	区分名
-		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+i+")' align=right>"+Cards[i].count+"</td>";			//	分割数
-		s+="<td align=right style='cursor:pointer' title='特記事項を修正します' onClick='Maint_Refuses("+i+")'>"+Cards[i].refuses+"</td>";		//	特記件数
-		s+="<td nowrap style='cursor:pointer;font-size:12px;' title='地図の一覧表示を行います' onClick='MENU1P("+i+")'";
-		if (Cards[i].Buildings.Count!=0)
+		s+="<td style='cursor:pointer' title='詳細情報を修正します' onClick='MENU1B("+num+")' align=right>"+num+"</td>";				//	区域番号
+		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+num+")'>"+ctbl[i].name+"</td>";							//	区域名
+		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+num+")'>"+ctbl[i].kubun+"</td>";						//	区分名
+		s+="<td style='cursor:pointer' title='地図の一覧表示を行います' onClick='MENU1P("+num+")' align=right>"+ctbl[i].maps+"</td>";			//	分割数
+		s+="<td align=right style='cursor:pointer' title='特記事項を修正します' onClick='Maint_Refuses("+num+")'>"+ctbl[i].refuses+"</td>";		//	特記件数
+		s+="<td nowrap style='cursor:pointer;font-size:12px;' title='地図の一覧表示を行います' onClick='MENU1P("+num+")'";
+		if (ctbl[i].buildings!=0)
 			{
 			s+=" align=right>";
-			s+=Cards[i].Buildings.Count+"軒("+Cards[i].Buildings.House+"世帯)";
+			s+=ctbl[i].buildings+"軒("+ctbl[i].persons+"世帯)";
 			}
 		else s+=" align=center>-";
 		s+="</td>";
-		s+="<td style='cursor:pointer;white-space:nowrap;' title='新規使用開始／終了情報の入力を行います' onClick='MENU1E("+i+")'";
-		if (Cards[i].status.indexOf("使用中",0)!=-1) s+=" bgcolor='#ffff00'";
-		//	2018/1/19 キャンペーンルール変更
-		if ((Cards[i].status.indexOf("未使用",0)==0)||(Cards[i].status.indexOf("キャンペーン",0)==0))
+
+		//	右端セルの表示
+		if (ctbl[i].Status.indexOf("使用中",0)!=-1)
 			{
-			if (isCampeign(today))		//	キャンペーン期間中
+			s+="<td style='cursor:pointer;white-space:nowrap;' title='使用終了情報の入力を行います' onClick='MENU1E("+num+")'";
+			s+=" bgcolor='#ffff00'";
+			}
+		else{
+			if (ctbl[i].Avail=="true")
 				{
-				if (Cards[i].Blank<ConfigAll.BlankCampeign) s+=" bgcolor='#ffaaaa'";
-				else s+=" bgcolor='#aaffff'";
+				s+="<td style='cursor:pointer;white-space:nowrap;' title='新規使用開始の入力を行います' onClick='MENU1E("+num+")'";
+				s+=" bgcolor='#aaffff'";
 				}
 			else{
-				if (isAfterCampeign(today))	//	ｷｬﾝﾍﾟｰﾝ後30日
-					{
-					if ((Cards[i].Blank<ConfigAll.BlankAfterCampeign)&&(Cards[i].Blank!=-1)) s+=" bgcolor='#ffaaaa'";
-					else s+=" bgcolor='#aaffff'";
-					}
-				else{
-					if ((Cards[i].Blank<ConfigAll.BlankMin)&&(Cards[i].Blank!=-1)) s+=" bgcolor='#ffaaaa'";
-					else s+=" bgcolor='#aaffff'";
-					}
+				s+="<td style='white-space:nowrap;'";
+				s+=" bgcolor='#ffaaaa'";
 				}
 			}
-		//	2018/1/19 キャンペーンルール変更
-		s+=">"+Cards[i].status+"</td>";	//	使用状況
+		s+=">"+ctbl[i].Status+"</td>";	//	使用状況
 		s+="</tr>";
 		}
 	s+="</table></form>";
@@ -1251,16 +1259,6 @@ function MENU1E_End_Exec(num)
 	obj.History[l].Limit=overday;
 	SetLogSummary(obj);
 	SaveLog(obj,num);
-	if (obj.Status=="Using")
-		{
-		s="("+num+")"+Cards[num].name;
-		}
-	else{
-		if (cmpday1==99999999) cmpday1=b;
-		cmpday1=SplitDate(cmpday1);
-		cmpday2=SplitDate(cmpday2);
-		s="("+num+")"+Cards[num].name+"、使用期間＝"+cmpday1+"～"+cmpday2+"、使用者＝"+a;
-		}
 	LoadCard(num);
 	CreateSummaryofPerson(num,true);
 	MENU1EExit();
@@ -1342,11 +1340,6 @@ function MENU1E_Complete_Exec(num)
 		}
 	FinishLog(obj,num,true);
 	SaveLog(obj,num);
-	if (cmpday1==99999999) cmpday1=ymd;
-	cmpday1=SplitDate(cmpday1);
-	cmpday2=SplitDate(cmpday2);
-	s="("+num+")"+Cards[num].name;
-	s+="、使用期間＝"+cmpday1+"～"+cmpday2+"、使用者＝"+a;
 	LoadCard(num);
 	CreateSummaryofPerson(num,true);
 	MENU1EExit();
@@ -1506,6 +1499,9 @@ function SaveConfig(num)
 		}
 	obj.RTB=clone(Cards[num].RTB);
 	WriteXMLFile(obj,ConfigXML(num));
+	//	SQlite処理を追加(2018/11/10)
+	var sqobj=CreatePublicList_One(num);
+	SQ_Replace("PublicList",sqobj);
 	}
 
 function GetUpdate(filename)
@@ -1764,7 +1760,7 @@ function MakeLogs(num)
 
 function ForceEnd()
 	{
-	var i,s,ss,Id,num,fld,stream,text,maxlogs,force;
+	var i,s,ss,Id,num,fld,stream,text,maxlogs;
 	var obj,l;
 	var lines=new Array();
 	var logs=new Array();
@@ -1773,29 +1769,17 @@ function ForceEnd()
 	var	m2=today.getMonth()+1;
 	var	d2=today.getDate();
 	var ymd2=(y2*10000+m2*100+d2)+"";
-	var forceperson="",force1="",force2="";
 
-	var dir=fso.GetFolder(DataFolder());
-	var folders=new Enumerator(dir.SubFolders);
-	for(; !folders.atEnd(); folders.moveNext())
+	//	通常区域の強制終了
+	var ctbl=SQ_Read("PublicList","congnum="+congnum,"num");
+	for(i=0;i<ctbl.length;i++)
 		{
-		fld=folders.item();
-		if (isNaN(fld.Name)) continue;
-		num=fso.GetBaseName(fld.Name);
+		num=ctbl[i].num;
+		if (ctbl[i].inuse=="false") continue;		//	使用中でない
+		if (ymd2<ctbl[i].limitday) continue;		//	終了日が来ていない
 		obj=LoadLog(num);
-		l=obj.History.length;
-		if (l==0) continue;					//	ログがない
-		if (obj.Status=="Free") continue;	//	使用中でない
-		l--;
-		if (ymd2<obj.History[l].Limit) continue;	//	終了日が来ていない
-
 		FinishLog(obj,num,false);
 		SaveLog(obj,num);
-		force1=obj.History[l].Rent;
-		force2=obj.History[l].End;
-		forceperson=obj.History[l].User;
-		s="区域番号＝"+num;
-		s+="、使用期間＝"+SplitDate(force1)+"～"+SplitDate(force2)+"、使用者＝"+forceperson;
 		}
 
 	//	集中ｲﾝﾀｰﾎﾝの自動終了
@@ -1812,9 +1796,6 @@ function ForceEnd()
 			logs=ss.split(",");
 			if (logs[2]!="") continue;
 			if (ymd2<logs[3]) continue;
-			forceperson=logs[0];
-			force1=logs[1];
-			force2=logs[3];
 			text=ReadFile(ApartFile(Id));
 			lines=text.split(/\r\n/);
 			maxlogs=lines.length;
@@ -1832,7 +1813,6 @@ function ForceEnd()
 				stream.WriteLine(s);
 				}
 			stream.close();
-			s="建物名称＝"+Id+"、使用期間＝"+SplitDate(force1)+"～"+SplitDate(force2)+"、使用者＝"+forceperson;
 			}
 		}
 	}
