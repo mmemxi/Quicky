@@ -214,7 +214,7 @@ function CreateFolders(foldername)
 //------------------------------------------------------------------
 function RunWSF(cmd)
 	{
-	var cmd=basepath+"\\congworks\\RunWSF.bat "+ConfigLocal.TokenID+" \""+cmd+"\"";
+	var cmd="\""+basepath+"\\congworks\\RunWSF.bat\" "+ConfigLocal.TokenID+" \""+cmd+"\"";
 	WshShell.Run(cmd,0,true);
 	result=ReadFile("c:\\temp\\quicky\\"+ConfigLocal.TokenID+".txt");
 	return result;
